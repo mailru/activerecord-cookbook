@@ -1,0 +1,10 @@
+- id: 1
+  name: any
+  another_id: 321
+  type: A
+  flags: 1
+- id: 2
+  name: it
+  another_id: 123
+  type: B
+  flags: 0

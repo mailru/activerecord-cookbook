@@ -1,0 +1,11 @@
+- code: 64G_android
+  update_options:
+#  приоритет в порядке упоминания
+    - services:
+        set_value:
+          flags:
+            UFLAG_PAID_ACCOUNT: true
+            UFLAG_PAID_UPLOAD: true
+          quota: 2.74877906944e+11
+    - partner:
+        set_value: sobakamiloru

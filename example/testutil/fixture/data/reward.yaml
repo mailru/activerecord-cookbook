@@ -1,0 +1,18 @@
+- code: 64G_android
+  services:
+    flags:
+      UFLAG_PAID_ACCOUNT: true
+      UFLAG_PAID_UPLOAD: true
+    quota: 6.8719476736e+10
+  partner: android
+  extra:
+    prepaid: true
+- code: 256G_android
+  services:
+    flags:
+      UFLAG_PAID_ACCOUNT: true
+      UFLAG_PAID_UPLOAD: true
+    quota: 2.74877906944e+11
+  partner: android
+  extra:
+    prepaid: true

@@ -1,0 +1,13 @@
+- id: fceb824174c043dc8febdb5a06493a00
+  code: GAMES9XQ7LWLF5CN3GMLK
+  email: not_real_mail_123@mail.ru
+  start: 1649679583
+  finish:
+    id: 2
+    name: ProdNam2
+    field: false
+    anotherfield: 3
+  action: 9a768aeabdea4ed8a5f54f9afba5cf5b
+  platform:
+    mobile: ios
+  promobunch: 1
