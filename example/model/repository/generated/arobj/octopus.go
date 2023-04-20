@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.4.2-4-g78facfc (Commit: 78facfc7)
+// Generate info: argen@v1.5.3 (Commit: e0ffb560)
 package arobj
 
 import (
