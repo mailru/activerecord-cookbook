@@ -5,14 +5,40 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/foo"
 	"github.com/mailru/activerecord/pkg/activerecord"
 	"github.com/mailru/activerecord/pkg/octopus"
+	"gotest.tools/assert"
 
 	"github.com/mailru/activerecord-cookbook/example/model/ds"
 	repository "github.com/mailru/activerecord-cookbook/example/model/repository/generated"
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/reward"
 	"github.com/mailru/activerecord-cookbook/example/testutil/fixture"
 )
+
+func _Test_callProc(t *testing.T) {
+	ctx := context.Background()
+
+	params := foo.FooParams{
+		SearchQuery: "who are you",
+		TraceID:     "",
+	}
+
+	res, err := foo.Call(ctx, params)
+	assert.NilError(t, err)
+
+	if res != nil {
+		resultStatus := res.GetStatus()
+		assert.Equal(t, "", resultStatus)
+
+		rawJson := res.GetJsonRawData()
+		assert.Equal(t, "", rawJson)
+
+		reqID := res.GetTraceID()
+		assert.Equal(t, "", reqID)
+	}
+
+}
 
 func Test_main(t *testing.T) {
 	ctx := context.Background()

@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3 (Commit: e0ffb560)
+// Generate info: argen@v1.5.3-1-g5a0f936 (Commit: 5a0f936d)
 package arobj
 
 import (
@@ -534,6 +534,8 @@ func selectBox(ctx context.Context, indexnum uint32, keysPacked [][][]byte, limi
 	return nps, nil
 }
 
+// indexes
+
 func (obj *ArObj) Primary() int32 {
 
 	return obj.GetID()
@@ -849,6 +851,7 @@ func SelectByTypePart(ctx context.Context, key string, limiter activerecord.Sele
 	return selected, nil
 }
 
+// end indexes
 func (obj *ArObj) Equal(anotherObjI any) bool {
 	anotherObj, ok := anotherObjI.(*ArObj)
 	if !ok {

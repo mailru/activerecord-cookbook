@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3 (Commit: e0ffb560)
+// Generate info: argen@v1.5.3-1-g5a0f936 (Commit: 5a0f936d)
 package reward
 
 import (
@@ -628,6 +628,8 @@ func selectBox(ctx context.Context, indexnum uint32, keysPacked [][][]byte, limi
 	return nps, nil
 }
 
+// indexes
+
 func (obj *Reward) Primary() string {
 
 	return obj.GetCode()
@@ -778,6 +780,7 @@ func SelectByPartner(ctx context.Context, key string, limiter activerecord.Selec
 	return selected, nil
 }
 
+// end indexes
 func (obj *Reward) Equal(anotherObjI any) bool {
 	anotherObj, ok := anotherObjI.(*Reward)
 	if !ok {

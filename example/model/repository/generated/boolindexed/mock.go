@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3 (Commit: e0ffb560)
+// Generate info: argen@v1.5.3-1-g5a0f936 (Commit: 5a0f936d)
 package boolindexed
 
 import (
@@ -39,6 +39,8 @@ func (obj *Boolindexed) MockSelectResponse() ([][]byte, error) {
 
 	return tuple, nil
 }
+
+//indexes
 
 func (obj *Boolindexed) MockSelectByCodeRequest(ctx context.Context) []byte {
 	key := []string{
@@ -187,6 +189,7 @@ func SelectByInvisibleMockerLogger(keys []bool, res BoolindexedList, limiter act
 	}
 }
 
+// indexes
 func (obj *Boolindexed) RepoSelector(ctx context.Context) (any, error) {
 	data, err := SelectByPrimary(ctx, obj.Primary())
 	if err != nil {
