@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.4.2-4-g78facfc (Commit: 78facfc7)
+// Generate info: argen@v1.5.3 (Commit: e0ffb560)
 package promoperiods
 
 import (
@@ -455,7 +455,7 @@ func (obj *Promoperiods) SetStart(Start int32) error {
 func packFinish(w []byte, Finish *dictionary.Product) ([]byte, error) {
 	pvar, err := serializerProduct.ProductMarshal(Finish)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error marshal field Finish: %w", err)
 	}
 
 	return iproto.PackUint64(w, pvar, iproto.ModeDefault), nil
@@ -476,7 +476,7 @@ func UnpackFinish(r *bytes.Reader) (ret *dictionary.Product, errRet error) {
 
 	err = serializerProduct.ProductUnmarshal(bvar, &svar)
 	if err != nil {
-		errRet = fmt.Errorf("error unmarshal serializer: %w", err)
+		errRet = fmt.Errorf("error unmarshal field Finish: %w", err)
 		return
 	}
 
@@ -544,7 +544,7 @@ func (obj *Promoperiods) SetAction(Action string) error {
 func packPlatform(w []byte, Platform map[string]interface{}) ([]byte, error) {
 	pvar, err := serializerJSON.JSONMarshal(Platform)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error marshal field Platform: %w", err)
 	}
 
 	return octopus.PackString(w, pvar, iproto.ModeDefault), nil
@@ -565,7 +565,7 @@ func UnpackPlatform(r *bytes.Reader) (ret map[string]interface{}, errRet error) 
 
 	err = serializerJSON.JSONUnmarshal(bvar, &svar)
 	if err != nil {
-		errRet = fmt.Errorf("error unmarshal serializer: %w", err)
+		errRet = fmt.Errorf("error unmarshal field Platform: %w", err)
 		return
 	}
 
@@ -853,7 +853,7 @@ func (obj *Promoperiods) SetPlanType(PlanType string) error {
 func packPrice(w []byte, Price float64) ([]byte, error) {
 	pvar, err := serializerJSON.PrintfMarshal("%.2f", Price)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error marshal field Price: %w", err)
 	}
 
 	return octopus.PackString(w, pvar, iproto.ModeDefault), nil
@@ -874,7 +874,7 @@ func UnpackPrice(r *bytes.Reader) (ret float64, errRet error) {
 
 	err = serializerJSON.PrintfUnmarshal("%.2f", bvar, &svar)
 	if err != nil {
-		errRet = fmt.Errorf("error unmarshal serializer: %w", err)
+		errRet = fmt.Errorf("error unmarshal field Price: %w", err)
 		return
 	}
 

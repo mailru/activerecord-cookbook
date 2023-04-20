@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.4.2-4-g78facfc (Commit: 78facfc7)
+// Generate info: argen@v1.5.3 (Commit: e0ffb560)
 package reward
 
 import (
@@ -256,7 +256,7 @@ func (obj *Reward) SetCode(Code string) error {
 func packServices(w []byte, Services *ds.Services) ([]byte, error) {
 	pvar, err := serializerExtra.MapstructureMarshal(Services)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error marshal field Services: %w", err)
 	}
 
 	return octopus.PackString(w, pvar, iproto.ModeDefault), nil
@@ -277,7 +277,7 @@ func UnpackServices(r *bytes.Reader) (ret *ds.Services, errRet error) {
 
 	err = serializerExtra.MapstructureUnmarshal(bvar, &svar)
 	if err != nil {
-		errRet = fmt.Errorf("error unmarshal serializer: %w", err)
+		errRet = fmt.Errorf("error unmarshal field Services: %w", err)
 		return
 	}
 
@@ -349,7 +349,7 @@ func (obj *Reward) SetPartner(Partner string) error {
 func packExtra(w []byte, Extra *ds.Extra) ([]byte, error) {
 	pvar, err := serializerExtra.MapstructureMarshal(Extra)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error marshal field Extra: %w", err)
 	}
 
 	return octopus.PackString(w, pvar, iproto.ModeDefault), nil
@@ -370,7 +370,7 @@ func UnpackExtra(r *bytes.Reader) (ret *ds.Extra, errRet error) {
 
 	err = serializerExtra.MapstructureUnmarshal(bvar, &svar)
 	if err != nil {
-		errRet = fmt.Errorf("error unmarshal serializer: %w", err)
+		errRet = fmt.Errorf("error unmarshal field Extra: %w", err)
 		return
 	}
 
@@ -400,7 +400,7 @@ func (obj *Reward) SetExtra(Extra *ds.Extra) error {
 func packFlags(w []byte, Flags map[string]interface{}) ([]byte, error) {
 	pvar, err := serializerExtra.JSONMarshal(Flags)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error marshal field Flags: %w", err)
 	}
 
 	return octopus.PackString(w, pvar, iproto.ModeDefault), nil
@@ -421,7 +421,7 @@ func UnpackFlags(r *bytes.Reader) (ret map[string]interface{}, errRet error) {
 
 	err = serializerExtra.JSONUnmarshal(bvar, &svar)
 	if err != nil {
-		errRet = fmt.Errorf("error unmarshal serializer: %w", err)
+		errRet = fmt.Errorf("error unmarshal field Flags: %w", err)
 		return
 	}
 
@@ -451,7 +451,7 @@ func (obj *Reward) SetFlags(Flags map[string]interface{}) error {
 func packUnlocked(w []byte, Unlocked ds.ServiceUnlocked) ([]byte, error) {
 	pvar, err := serializerExtra.JSONMarshal(Unlocked)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error marshal field Unlocked: %w", err)
 	}
 
 	return octopus.PackString(w, pvar, iproto.ModeDefault), nil
@@ -472,7 +472,7 @@ func UnpackUnlocked(r *bytes.Reader) (ret ds.ServiceUnlocked, errRet error) {
 
 	err = serializerExtra.JSONUnmarshal(bvar, &svar)
 	if err != nil {
-		errRet = fmt.Errorf("error unmarshal serializer: %w", err)
+		errRet = fmt.Errorf("error unmarshal field Unlocked: %w", err)
 		return
 	}
 
@@ -502,7 +502,7 @@ func (obj *Reward) SetUnlocked(Unlocked ds.ServiceUnlocked) error {
 func packDescription(w []byte, Description *string) ([]byte, error) {
 	pvar, err := serializerExtra.JSONMarshal(Description)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error marshal field Description: %w", err)
 	}
 
 	return octopus.PackString(w, pvar, iproto.ModeDefault), nil
@@ -523,7 +523,7 @@ func UnpackDescription(r *bytes.Reader) (ret *string, errRet error) {
 
 	err = serializerExtra.JSONUnmarshal(bvar, &svar)
 	if err != nil {
-		errRet = fmt.Errorf("error unmarshal serializer: %w", err)
+		errRet = fmt.Errorf("error unmarshal field Description: %w", err)
 		return
 	}
 
