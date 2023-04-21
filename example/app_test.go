@@ -19,6 +19,15 @@ import (
 func _Test_callProc(t *testing.T) {
 	ctx := context.Background()
 
+	activerecord.InitActiveRecord(
+		activerecord.WithConfig(activerecord.NewDefaultConfigFromMap(map[string]interface{}{
+			"arcfg/master":   "127.0.0.1:11011",
+			"arcfg/replica":  "127.0.0.1:11011",
+			"arcfg.PoolSize": 1,
+			"arcfg.Timeout":  time.Millisecond * 200,
+		})),
+	)
+
 	params := foo.FooParams{
 		SearchQuery: "who are you",
 		TraceID:     "",
@@ -29,10 +38,10 @@ func _Test_callProc(t *testing.T) {
 
 	if res != nil {
 		resultStatus := res.GetStatus()
-		assert.Equal(t, "", resultStatus)
+		assert.Equal(t, "200", resultStatus)
 
 		rawJson := res.GetJsonRawData()
-		assert.Equal(t, "", rawJson)
+		assert.Equal(t, `{"data": []}`, rawJson)
 
 		reqID := res.GetTraceID()
 		assert.Equal(t, "", reqID)
@@ -62,8 +71,8 @@ func Test_main(t *testing.T) {
 
 	activerecord.InitActiveRecord(
 		activerecord.WithConfig(activerecord.NewDefaultConfigFromMap(map[string]interface{}{
-			"arcfg/master":   octopusMockServer.GetServerHostPort(),
-			"arcfg/replica":  octopusMockServer.GetServerHostPort(),
+			"arcfg/master":   "127.0.0.1:11011",
+			"arcfg/replica":  "127.0.0.1:11011",
 			"arcfg.PoolSize": 1,
 			"arcfg.Timeout":  time.Millisecond * 200,
 		})),

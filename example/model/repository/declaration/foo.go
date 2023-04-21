@@ -1,7 +1,7 @@
 package repository
 
-//ar:serverHost:box1
-//ar:namespace:bar.foo
+//ar:serverConf:arcfg
+//ar:namespace:foo
 //ar:backend:octopus
 type ProcFieldsFoo struct {
 	SearchQuery string `ar:"input"`

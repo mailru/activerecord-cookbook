@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-1-g5a0f936 (Commit: 5a0f936d)
+// Generate info: argen@v1.5.3-3-gc6b08f5 (Commit: c6b08f5a)
 package reward
 
 import (
@@ -781,6 +781,7 @@ func SelectByPartner(ctx context.Context, key string, limiter activerecord.Selec
 }
 
 // end indexes
+
 func (obj *Reward) Equal(anotherObjI any) bool {
 	anotherObj, ok := anotherObjI.(*Reward)
 	if !ok {

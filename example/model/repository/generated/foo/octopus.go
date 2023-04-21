@@ -4,29 +4,28 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-1-g5a0f936 (Commit: 5a0f936d)
+// Generate info: argen@v1.5.3-3-gc6b08f5 (Commit: c6b08f5a)
 package foo
 
 import (
+	"bytes"
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/mailru/activerecord/pkg/activerecord"
+	"github.com/mailru/activerecord/pkg/iproto/iproto"
 	"github.com/mailru/activerecord/pkg/octopus"
 )
 
 // proc struct
 type Foo struct {
-	fieldTraceID string
-
-	fieldStatus string
-
+	fieldTraceID     string
+	fieldStatus      string
 	fieldJsonRawData string
 }
 
 const (
-	procName string = "bar.foo"
+	procName string = "foo"
 )
 
 func (obj *Foo) GetTraceID() string {
@@ -43,34 +42,140 @@ func (obj *Foo) GetJsonRawData() string {
 
 type FooParams struct {
 	SearchQuery string
+	TraceID     string
+}
 
-	TraceID string
+func (obj *FooParams) arrayValues() []string {
+	return []string{
+		obj.SearchQuery,
+		obj.TraceID,
+	}
 }
 
 func Call(ctx context.Context, params FooParams) (*Foo, error) {
-	c, _ := box(ctx, 0, activerecord.ReplicaInstanceType)
+	logger := activerecord.Logger()
+	ctx = logger.SetLoggerValueToContext(ctx, map[string]interface{}{"LuaProc": procName})
+	metricTimer := activerecord.Metric().Timer("octopus", "Foo")
+	metricErrCnt := activerecord.Metric().ErrorCount("octopus", "Foo")
 
-	td, err := octopus.CallLua(ctx, c, procName)
+	metricTimer.Timing(ctx, "call_proc")
+
+	connection, err := box(ctx, 0, activerecord.ReplicaInstanceType)
 	if err != nil {
+		metricErrCnt.Inc(ctx, "call_proc_preparebox", 1)
+		logger.Error(ctx, fmt.Sprintf("Error get box '%s'", err))
+
+		return nil, err
+	}
+
+	tuples, err := octopus.CallLua(ctx, connection, procName, params.arrayValues()...)
+	if err != nil {
+		metricErrCnt.Inc(ctx, "call_proc", 1)
 		return nil, fmt.Errorf("call lua procedure %s: %w", procName, err)
 	}
 
-	_ = td
+	ret, err := tupleToStruct(ctx, tuples)
+	if err != nil {
+		metricErrCnt.Inc(ctx, "call_proc_preparebox", 1)
+		logger.Error(ctx, "Error in response: ", err)
 
-	return nil, nil
+		return nil, err
+	}
+
+	metricTimer.Finish(ctx, "call_proc")
+
+	return ret, nil
+}
+
+func tupleToStruct(ctx context.Context, tuples []octopus.TupleData) (*Foo, error) {
+	np := Foo{}
+
+	valTraceID, err := UnpackTraceID(bytes.NewReader(tuples[1-1].Data[0]))
+	if err != nil {
+		return nil, err
+	}
+
+	np.fieldTraceID = valTraceID
+
+	valStatus, err := UnpackStatus(bytes.NewReader(tuples[2-1].Data[0]))
+	if err != nil {
+		return nil, err
+	}
+
+	np.fieldStatus = valStatus
+
+	valJsonRawData, err := UnpackJsonRawData(bytes.NewReader(tuples[3-1].Data[0]))
+	if err != nil {
+		return nil, err
+	}
+
+	np.fieldJsonRawData = valJsonRawData
+
+	return &np, nil
+}
+
+func UnpackSearchQuery(r *bytes.Reader) (ret string, errRet error) {
+	var SearchQuery string
+
+	err := octopus.UnpackString(r, &SearchQuery, iproto.ModeDefault)
+	if err != nil {
+		errRet = fmt.Errorf("error unpack field SearchQuery in tuple: '%w'", err)
+		return
+	}
+
+	bvar := SearchQuery
+
+	svar := bvar
+
+	return svar, nil
+}
+func UnpackTraceID(r *bytes.Reader) (ret string, errRet error) {
+	var TraceID string
+
+	err := octopus.UnpackString(r, &TraceID, iproto.ModeDefault)
+	if err != nil {
+		errRet = fmt.Errorf("error unpack field TraceID in tuple: '%w'", err)
+		return
+	}
+
+	bvar := TraceID
+
+	svar := bvar
+
+	return svar, nil
+}
+func UnpackStatus(r *bytes.Reader) (ret string, errRet error) {
+	var Status string
+
+	err := octopus.UnpackString(r, &Status, iproto.ModeDefault)
+	if err != nil {
+		errRet = fmt.Errorf("error unpack field Status in tuple: '%w'", err)
+		return
+	}
+
+	bvar := Status
+
+	svar := bvar
+
+	return svar, nil
+}
+func UnpackJsonRawData(r *bytes.Reader) (ret string, errRet error) {
+	var JsonRawData string
+
+	err := octopus.UnpackString(r, &JsonRawData, iproto.ModeDefault)
+	if err != nil {
+		errRet = fmt.Errorf("error unpack field JsonRawData in tuple: '%w'", err)
+		return
+	}
+
+	bvar := JsonRawData
+
+	svar := bvar
+
+	return svar, nil
 }
 
 // end proc struct
-
-var boxOption, _ = octopus.NewOptions(
-	"box1:",
-	octopus.ModeMaster,
-	octopus.WithTimeout(time.Millisecond*0, time.Millisecond*0),
-)
-
-var clusterInfo = activerecord.NewClusterInfo(
-	activerecord.WithShard([]activerecord.OptionInterface{boxOption}, []activerecord.OptionInterface{}),
-)
 
 // box - возвращает коннектор для БД
 // TODO
@@ -78,6 +183,31 @@ var clusterInfo = activerecord.NewClusterInfo(
 // - сделать статистику по используемым инстансам
 // - прикрутить локальный пингер и исключать недоступные инстансы
 func box(ctx context.Context, shard int, instType activerecord.ShardInstanceType) (*octopus.Connection, error) {
+	configPath := "arcfg"
+
+	clusterInfo, err := activerecord.ConfigCacher().Get(
+		ctx,
+		configPath,
+		activerecord.MapGlobParam{
+			Timeout:  octopus.DefaultConnectionTimeout,
+			PoolSize: octopus.DefaultPoolSize,
+		},
+		func(sic activerecord.ShardInstanceConfig) (activerecord.OptionInterface, error) {
+			return octopus.NewOptions(
+				sic.Addr,
+				octopus.ServerModeType(sic.Mode),
+				octopus.WithTimeout(sic.Timeout, sic.Timeout),
+				octopus.WithPoolSize(sic.PoolSize),
+			)
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("can't get cluster %s info: %w", configPath, err)
+	}
+
+	if len(clusterInfo) < int(shard) {
+		return nil, fmt.Errorf("invalid shard num %d, max = %d", shard, len(clusterInfo))
+	}
 
 	var configBox activerecord.ShardInstance
 
@@ -118,3 +248,5 @@ func box(ctx context.Context, shard int, instType activerecord.ShardInstanceType
 
 	return box, nil
 }
+
+// end indexes
