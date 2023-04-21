@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-1-g5a0f936 (Commit: 5a0f936d)
+// Generate info: argen@v1.5.3-3-g773f54b (Commit: 773f54bd)
 package repository
 
 import (
@@ -73,6 +73,7 @@ var NamespacePackages = NSPackage{
 			},
 		},
 		Indexes: map[string]IndexMeta{
+
 			"0.1": {
 				Name:     "ID",
 				Unpacker: func(packedKeys [][][]byte) (any, error) { return arobj.UnpackKeyIndexID(packedKeys) },
@@ -91,6 +92,7 @@ var NamespacePackages = NSPackage{
 			},
 		},
 		PK: IndexMeta{
+
 			Name:     "ID",
 			Unpacker: func(packedKeys [][][]byte) (any, error) { return arobj.UnpackKeyIndexID(packedKeys) },
 		},
@@ -118,6 +120,7 @@ var NamespacePackages = NSPackage{
 			},
 		},
 		Indexes: map[string]IndexMeta{
+
 			"0.1": {
 				Name:     "Code",
 				Unpacker: func(packedKeys [][][]byte) (any, error) { return boolindexed.UnpackKeyIndexCode(packedKeys) },
@@ -128,6 +131,7 @@ var NamespacePackages = NSPackage{
 			},
 		},
 		PK: IndexMeta{
+
 			Name:     "Code",
 			Unpacker: func(packedKeys [][][]byte) (any, error) { return boolindexed.UnpackKeyIndexCode(packedKeys) },
 		},
@@ -201,6 +205,7 @@ var NamespacePackages = NSPackage{
 			},
 		},
 		Indexes: map[string]IndexMeta{
+
 			"0.1": {
 				Name:     "ID",
 				Unpacker: func(packedKeys [][][]byte) (any, error) { return promoperiods.UnpackKeyIndexID(packedKeys) },
@@ -231,6 +236,7 @@ var NamespacePackages = NSPackage{
 			},
 		},
 		PK: IndexMeta{
+
 			Name:     "ID",
 			Unpacker: func(packedKeys [][][]byte) (any, error) { return promoperiods.UnpackKeyIndexID(packedKeys) },
 		},
@@ -276,6 +282,7 @@ var NamespacePackages = NSPackage{
 			},
 		},
 		Indexes: map[string]IndexMeta{
+
 			"0.1": {
 				Name:     "Code",
 				Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexCode(packedKeys) },
@@ -286,6 +293,7 @@ var NamespacePackages = NSPackage{
 			},
 		},
 		PK: IndexMeta{
+
 			Name:     "Code",
 			Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexCode(packedKeys) },
 		},

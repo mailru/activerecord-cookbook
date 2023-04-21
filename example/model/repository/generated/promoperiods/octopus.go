@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-1-g5a0f936 (Commit: 5a0f936d)
+// Generate info: argen@v1.5.3-3-g773f54b (Commit: 773f54bd)
 package promoperiods
 
 import (
@@ -132,6 +132,7 @@ func New(ctx context.Context) *Promoperiods {
 
 	return &newObj
 }
+
 func repairTuple(ctx context.Context, tuple *octopus.TupleData) error {
 	logger := activerecord.Logger()
 

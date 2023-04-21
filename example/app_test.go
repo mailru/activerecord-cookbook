@@ -19,20 +19,51 @@ import (
 func _Test_callProc(t *testing.T) {
 	ctx := context.Background()
 
+	octopusMockServer, err := octopus.InitMockServer(octopus.WithLogger(&octopus.DefaultLogger{DebugMeta: repository.NamespacePackages}))
+	if err != nil {
+		t.Errorf("can't start server: %s", err)
+	}
+
+	err = octopusMockServer.Start()
+	if err != nil {
+		t.Errorf("can't start server: %s", err)
+	}
+
+	defer func() {
+		err = octopusMockServer.Stop()
+		if err != nil {
+			t.Errorf("can't stop server: %s", err)
+		}
+	}()
+
+	activerecord.InitActiveRecord(
+		activerecord.WithConfig(activerecord.NewDefaultConfigFromMap(map[string]interface{}{
+			/*			"arcfg/master":   "127.0.0.1:11011",
+						"arcfg/replica":  "127.0.0.1:11011",*/
+			"arcfg/master":   octopusMockServer.GetServerHostPort(),
+			"arcfg/replica":  octopusMockServer.GetServerHostPort(),
+			"arcfg.PoolSize": 1,
+			"arcfg.Timeout":  time.Millisecond * 200,
+		})),
+	)
+
 	params := foo.FooParams{
 		SearchQuery: "who are you",
 		TraceID:     "",
 	}
 
+	octopusMockServer.SetFixtures([]octopus.FixtureType{
+		fixture.FooProcedureMocker{}.ByFixtureParams(ctx, params),
+	})
+
 	res, err := foo.Call(ctx, params)
 	assert.NilError(t, err)
 
 	if res != nil {
-		resultStatus := res.GetStatus()
-		assert.Equal(t, "", resultStatus)
 
 		rawJson := res.GetJsonRawData()
-		assert.Equal(t, "", rawJson)
+		assert.Equal(t, "200", rawJson.Status)
+		assert.Equal(t, "bar", rawJson.Data)
 
 		reqID := res.GetTraceID()
 		assert.Equal(t, "", reqID)
