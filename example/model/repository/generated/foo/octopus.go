@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-3-g773f54b (Commit: 773f54bd)
+// Generate info: argen@v1.5.3-4-gd9702e9 (Commit: d9702e9f)
 package foo
 
 import (
@@ -72,13 +72,17 @@ func Call(ctx context.Context, params FooParams) (*Foo, error) {
 		return nil, err
 	}
 
-	tuples, err := octopus.CallLua(ctx, connection, procName, params.arrayValues()...)
+	td, err := octopus.CallLua(ctx, connection, procName, params.arrayValues()...)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "call_proc", 1)
 		return nil, fmt.Errorf("call lua procedure %s: %w", procName, err)
 	}
 
-	ret, err := tupleToStruct(ctx, tuples)
+	if len(td) != 1 {
+		return nil, fmt.Errorf("invalid response len from lua call: %d", len(td))
+	}
+
+	ret, err := TupleToStruct(ctx, td[0])
 	if err != nil {
 		metricErrCnt.Inc(ctx, "call_proc_preparebox", 1)
 		logger.Error(ctx, "Error in response: ", err)
@@ -91,17 +95,17 @@ func Call(ctx context.Context, params FooParams) (*Foo, error) {
 	return ret, nil
 }
 
-func tupleToStruct(ctx context.Context, tuples []octopus.TupleData) (*Foo, error) {
+func TupleToStruct(ctx context.Context, tuple octopus.TupleData) (*Foo, error) {
 	np := Foo{}
 
-	valTraceID, err := UnpackTraceID(bytes.NewReader(tuples[1-1].Data[0]))
+	valTraceID, err := UnpackTraceID(bytes.NewReader(tuple.Data[1-1]))
 	if err != nil {
 		return nil, err
 	}
 
 	np.fieldTraceID = valTraceID
 
-	valJsonRawData, err := UnpackJsonRawData(bytes.NewReader(tuples[2-1].Data[0]))
+	valJsonRawData, err := UnpackJsonRawData(bytes.NewReader(tuple.Data[2-1]))
 	if err != nil {
 		return nil, err
 	}
@@ -268,6 +272,11 @@ func box(ctx context.Context, shard int, instType activerecord.ShardInstanceType
 	}
 
 	return box, nil
+}
+
+func New(ctx context.Context) *Foo {
+	newObj := Foo{}
+	return &newObj
 }
 
 // end indexes

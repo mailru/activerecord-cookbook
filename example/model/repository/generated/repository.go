@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-3-g773f54b (Commit: 773f54bd)
+// Generate info: argen@v1.5.3-4-gd9702e9 (Commit: d9702e9f)
 package repository
 
 import (
@@ -14,6 +14,7 @@ import (
 
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/arobj"
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/boolindexed"
+	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/foo"
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/promoperiods"
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/reward"
 	"github.com/mailru/activerecord/pkg/octopus"
@@ -40,63 +41,6 @@ type FieldMeta struct {
 type NSPackage map[uint32]SpaceMeta
 
 var NamespacePackages = NSPackage{
-	5: {
-		PackageName: "arobj",
-		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
-			obj, err := arobj.TupleToStruct(ctx, tuple)
-			if err != nil {
-				return nil, fmt.Errorf("can't decode tuple: %s", err)
-			}
-
-			return arobj.MarshalFixtures([]*arobj.ArObj{obj})
-		},
-		Fields: []FieldMeta{
-			{
-				Name:     "ID",
-				Unpacker: func(packedField []byte) (any, error) { return arobj.UnpackID(bytes.NewReader(packedField)) },
-			},
-			{
-				Name:     "Name",
-				Unpacker: func(packedField []byte) (any, error) { return arobj.UnpackName(bytes.NewReader(packedField)) },
-			},
-			{
-				Name:     "AnotherID",
-				Unpacker: func(packedField []byte) (any, error) { return arobj.UnpackAnotherID(bytes.NewReader(packedField)) },
-			},
-			{
-				Name:     "Type",
-				Unpacker: func(packedField []byte) (any, error) { return arobj.UnpackType(bytes.NewReader(packedField)) },
-			},
-			{
-				Name:     "Flags",
-				Unpacker: func(packedField []byte) (any, error) { return arobj.UnpackFlags(bytes.NewReader(packedField)) },
-			},
-		},
-		Indexes: map[string]IndexMeta{
-
-			"0.1": {
-				Name:     "ID",
-				Unpacker: func(packedKeys [][][]byte) (any, error) { return arobj.UnpackKeyIndexID(packedKeys) },
-			},
-			"1.1": {
-				Name:     "Type",
-				Unpacker: func(packedKeys [][][]byte) (any, error) { return arobj.UnpackKeyIndexType(packedKeys) },
-			},
-			"2.2": {
-				Name:     "TypeID",
-				Unpacker: func(packedKeys [][][]byte) (any, error) { return arobj.UnpackKeyIndexTypeID(packedKeys) },
-			},
-			"2.1": {
-				Name:     "TypePart",
-				Unpacker: func(packedKeys [][][]byte) (any, error) { return arobj.UnpackKeyIndexTypePart(packedKeys) },
-			},
-		},
-		PK: IndexMeta{
-
-			Name:     "ID",
-			Unpacker: func(packedKeys [][][]byte) (any, error) { return arobj.UnpackKeyIndexID(packedKeys) },
-		},
-	},
 	25: {
 		PackageName: "boolindexed",
 		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
@@ -135,6 +79,20 @@ var NamespacePackages = NSPackage{
 			Name:     "Code",
 			Unpacker: func(packedKeys [][][]byte) (any, error) { return boolindexed.UnpackKeyIndexCode(packedKeys) },
 		},
+	},
+	0: {
+		PackageName: "foo",
+		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
+			obj, err := foo.TupleToStruct(ctx, tuple)
+			if err != nil {
+				return nil, fmt.Errorf("can't decode tuple: %s", err)
+			}
+
+			return foo.MarshalFixtures([]*foo.Foo{obj})
+		},
+		Fields:  []FieldMeta{},
+		Indexes: map[string]IndexMeta{},
+		PK:      IndexMeta{},
 	},
 	6: {
 		PackageName: "promoperiods",
@@ -296,6 +254,63 @@ var NamespacePackages = NSPackage{
 
 			Name:     "Code",
 			Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexCode(packedKeys) },
+		},
+	},
+	5: {
+		PackageName: "arobj",
+		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
+			obj, err := arobj.TupleToStruct(ctx, tuple)
+			if err != nil {
+				return nil, fmt.Errorf("can't decode tuple: %s", err)
+			}
+
+			return arobj.MarshalFixtures([]*arobj.ArObj{obj})
+		},
+		Fields: []FieldMeta{
+			{
+				Name:     "ID",
+				Unpacker: func(packedField []byte) (any, error) { return arobj.UnpackID(bytes.NewReader(packedField)) },
+			},
+			{
+				Name:     "Name",
+				Unpacker: func(packedField []byte) (any, error) { return arobj.UnpackName(bytes.NewReader(packedField)) },
+			},
+			{
+				Name:     "AnotherID",
+				Unpacker: func(packedField []byte) (any, error) { return arobj.UnpackAnotherID(bytes.NewReader(packedField)) },
+			},
+			{
+				Name:     "Type",
+				Unpacker: func(packedField []byte) (any, error) { return arobj.UnpackType(bytes.NewReader(packedField)) },
+			},
+			{
+				Name:     "Flags",
+				Unpacker: func(packedField []byte) (any, error) { return arobj.UnpackFlags(bytes.NewReader(packedField)) },
+			},
+		},
+		Indexes: map[string]IndexMeta{
+
+			"0.1": {
+				Name:     "ID",
+				Unpacker: func(packedKeys [][][]byte) (any, error) { return arobj.UnpackKeyIndexID(packedKeys) },
+			},
+			"1.1": {
+				Name:     "Type",
+				Unpacker: func(packedKeys [][][]byte) (any, error) { return arobj.UnpackKeyIndexType(packedKeys) },
+			},
+			"2.2": {
+				Name:     "TypeID",
+				Unpacker: func(packedKeys [][][]byte) (any, error) { return arobj.UnpackKeyIndexTypeID(packedKeys) },
+			},
+			"2.1": {
+				Name:     "TypePart",
+				Unpacker: func(packedKeys [][][]byte) (any, error) { return arobj.UnpackKeyIndexTypePart(packedKeys) },
+			},
+		},
+		PK: IndexMeta{
+
+			Name:     "ID",
+			Unpacker: func(packedKeys [][][]byte) (any, error) { return arobj.UnpackKeyIndexID(packedKeys) },
 		},
 	},
 }

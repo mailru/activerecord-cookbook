@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/foo"
+	"github.com/mailru/activerecord-cookbook/example/model/s2s"
 	"github.com/mailru/activerecord/pkg/activerecord"
 	"github.com/mailru/activerecord/pkg/octopus"
 	"gotest.tools/assert"
@@ -16,7 +17,7 @@ import (
 	"github.com/mailru/activerecord-cookbook/example/testutil/fixture"
 )
 
-func _Test_callProc(t *testing.T) {
+func Test_callProc(t *testing.T) {
 	ctx := context.Background()
 
 	octopusMockServer, err := octopus.InitMockServer(octopus.WithLogger(&octopus.DefaultLogger{DebugMeta: repository.NamespacePackages}))
@@ -52,8 +53,16 @@ func _Test_callProc(t *testing.T) {
 		TraceID:     "",
 	}
 
+	mock := &foo.Foo{}
+	mock.SetTraceID("")
+	mock.SetJsonRawData(&s2s.ServiceResponse{
+		Status: "200",
+		Data:   "bar",
+	})
 	octopusMockServer.SetFixtures([]octopus.FixtureType{
-		fixture.FooProcedureMocker{}.ByFixtureParams(ctx, params),
+		fixture.FooProcedureMocker{}.ByParamsMocks(ctx, params, []octopus.MockEntities{
+			mock,
+		}),
 	})
 
 	res, err := foo.Call(ctx, params)
