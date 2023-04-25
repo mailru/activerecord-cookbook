@@ -4,13 +4,14 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-5-g90e9b6c (Commit: 90e9b6c3)
+// Generate info: argen@v1.5.3-7-g0d63e41 (Commit: 0d63e411)
 package repository
 
 import (
 	"bytes"
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/arobj"
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/boolindexed"
@@ -38,10 +39,72 @@ type FieldMeta struct {
 	Unpacker func(packedField []byte) (any, error)
 }
 
-type NSPackage map[uint32]SpaceMeta
+type NSPackage map[string]SpaceMeta
+
+func (ns NSPackage) meta(n uint32) (SpaceMeta, bool) {
+	v, ok := ns[strconv.Itoa(int(n))]
+	return v, ok
+}
 
 var NamespacePackages = NSPackage{
-	5: {
+	"24": {
+		PackageName: "reward",
+		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
+			obj, err := reward.TupleToStruct(ctx, tuple)
+			if err != nil {
+				return nil, fmt.Errorf("can't decode tuple: %s", err)
+			}
+
+			return reward.MarshalFixtures([]*reward.Reward{obj})
+		},
+		Fields: []FieldMeta{
+			{
+				Name:     "Code",
+				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackCode(bytes.NewReader(packedField)) },
+			},
+			{
+				Name:     "Services",
+				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackServices(bytes.NewReader(packedField)) },
+			},
+			{
+				Name:     "Partner",
+				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackPartner(bytes.NewReader(packedField)) },
+			},
+			{
+				Name:     "Extra",
+				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackExtra(bytes.NewReader(packedField)) },
+			},
+			{
+				Name:     "Flags",
+				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackFlags(bytes.NewReader(packedField)) },
+			},
+			{
+				Name:     "Unlocked",
+				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackUnlocked(bytes.NewReader(packedField)) },
+			},
+			{
+				Name:     "Description",
+				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackDescription(bytes.NewReader(packedField)) },
+			},
+		},
+		Indexes: map[string]IndexMeta{
+
+			"0.1": {
+				Name:     "Code",
+				Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexCode(packedKeys) },
+			},
+			"1.1": {
+				Name:     "Partner",
+				Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexPartner(packedKeys) },
+			},
+		},
+		PK: IndexMeta{
+
+			Name:     "Code",
+			Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexCode(packedKeys) },
+		},
+	},
+	"5": {
 		PackageName: "arobj",
 		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
 			obj, err := arobj.TupleToStruct(ctx, tuple)
@@ -98,7 +161,7 @@ var NamespacePackages = NSPackage{
 			Unpacker: func(packedKeys [][][]byte) (any, error) { return arobj.UnpackKeyIndexID(packedKeys) },
 		},
 	},
-	25: {
+	"25": {
 		PackageName: "boolindexed",
 		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
 			obj, err := boolindexed.TupleToStruct(ctx, tuple)
@@ -137,7 +200,7 @@ var NamespacePackages = NSPackage{
 			Unpacker: func(packedKeys [][][]byte) (any, error) { return boolindexed.UnpackKeyIndexCode(packedKeys) },
 		},
 	},
-	0: {
+	"foo": {
 		PackageName: "foo",
 		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
 			obj, err := foo.TupleToStruct(ctx, tuple)
@@ -151,7 +214,7 @@ var NamespacePackages = NSPackage{
 		Indexes: map[string]IndexMeta{},
 		PK:      IndexMeta{},
 	},
-	6: {
+	"6": {
 		PackageName: "promoperiods",
 		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
 			obj, err := promoperiods.TupleToStruct(ctx, tuple)
@@ -256,67 +319,10 @@ var NamespacePackages = NSPackage{
 			Unpacker: func(packedKeys [][][]byte) (any, error) { return promoperiods.UnpackKeyIndexID(packedKeys) },
 		},
 	},
-	24: {
-		PackageName: "reward",
-		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
-			obj, err := reward.TupleToStruct(ctx, tuple)
-			if err != nil {
-				return nil, fmt.Errorf("can't decode tuple: %s", err)
-			}
-
-			return reward.MarshalFixtures([]*reward.Reward{obj})
-		},
-		Fields: []FieldMeta{
-			{
-				Name:     "Code",
-				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackCode(bytes.NewReader(packedField)) },
-			},
-			{
-				Name:     "Services",
-				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackServices(bytes.NewReader(packedField)) },
-			},
-			{
-				Name:     "Partner",
-				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackPartner(bytes.NewReader(packedField)) },
-			},
-			{
-				Name:     "Extra",
-				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackExtra(bytes.NewReader(packedField)) },
-			},
-			{
-				Name:     "Flags",
-				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackFlags(bytes.NewReader(packedField)) },
-			},
-			{
-				Name:     "Unlocked",
-				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackUnlocked(bytes.NewReader(packedField)) },
-			},
-			{
-				Name:     "Description",
-				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackDescription(bytes.NewReader(packedField)) },
-			},
-		},
-		Indexes: map[string]IndexMeta{
-
-			"0.1": {
-				Name:     "Code",
-				Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexCode(packedKeys) },
-			},
-			"1.1": {
-				Name:     "Partner",
-				Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexPartner(packedKeys) },
-			},
-		},
-		PK: IndexMeta{
-
-			Name:     "Code",
-			Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexCode(packedKeys) },
-		},
-	},
 }
 
 func (n NSPackage) GetSelectDebugInfo(ns uint32, indexnum uint32, offset uint32, limit uint32, keys [][][]byte) string {
-	spacemeta, ex := n[ns]
+	spacemeta, ex := n.meta(ns)
 	if !ex {
 		return fmt.Sprintf("unknown space %d, index: %d, offset: %d, limit: %d, Keys: %+v", ns, indexnum, offset, limit, keys)
 	}
@@ -335,7 +341,7 @@ func (n NSPackage) GetSelectDebugInfo(ns uint32, indexnum uint32, offset uint32,
 }
 
 func (n NSPackage) GetUpdateDebugInfo(ns uint32, primaryKey [][]byte, updateOps []octopus.Ops) string {
-	spacemeta, ex := n[ns]
+	spacemeta, ex := n.meta(ns)
 	if !ex {
 		return fmt.Sprintf("unknown space %d, primaryKey: %+v, updateOps: %+v", ns, primaryKey, updateOps)
 	}
@@ -360,7 +366,7 @@ func (n NSPackage) GetUpdateDebugInfo(ns uint32, primaryKey [][]byte, updateOps 
 }
 
 func (n NSPackage) GetDeleteDebugInfo(ns uint32, primaryKey [][]byte) string {
-	spacemeta, ex := n[ns]
+	spacemeta, ex := n.meta(ns)
 	if !ex {
 		return fmt.Sprintf("unknown space %d, primaryKey: %+v", ns, primaryKey)
 	}
@@ -376,7 +382,7 @@ func (n NSPackage) GetDeleteDebugInfo(ns uint32, primaryKey [][]byte) string {
 func (n NSPackage) GetInsertDebugInfo(ns uint32, needRetVal bool, insertMode octopus.InsertMode, tuple octopus.TupleData) string {
 	strMode := octopus.GetInsertModeName(insertMode)
 
-	spacemeta, ex := n[ns]
+	spacemeta, ex := n.meta(ns)
 	if !ex {
 		return fmt.Sprintf("unknown space %d, insertMode: %s, tuple: %+v", ns, strMode, tuple)
 	}

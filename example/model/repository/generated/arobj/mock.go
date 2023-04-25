@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-5-g90e9b6c (Commit: 90e9b6c3)
+// Generate info: argen@v1.5.3-7-g0d63e41 (Commit: 0d63e411)
 package arobj
 
 import (
@@ -61,8 +61,6 @@ func (obj *ArObj) MockSelectResponse() ([][]byte, error) {
 
 	return tuple, nil
 }
-
-//indexes
 
 func (obj *ArObj) MockSelectByIDRequest(ctx context.Context) []byte {
 	key := []int32{
@@ -369,7 +367,6 @@ func SelectByTypePartMockerLogger(keys []string, res ArObjList, limiter activere
 	}
 }
 
-// indexes
 func (obj *ArObj) RepoSelector(ctx context.Context) (any, error) {
 	data, err := SelectByPrimary(ctx, obj.Primary())
 	if err != nil {

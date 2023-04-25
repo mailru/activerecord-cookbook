@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-5-g90e9b6c (Commit: 90e9b6c3)
+// Generate info: argen@v1.5.3-7-g0d63e41 (Commit: 0d63e411)
 package fixture
 
 import (
@@ -49,12 +49,16 @@ func GetFooByParams(params foo.FooParams) *foo.Foo {
 
 	ctx := activerecord.Logger().SetLoggerValueToContext(context.Background(), map[string]interface{}{"GetFooByParams": params, "FixtureStore": "fooStore"})
 
-	activerecord.Logger().Debug(ctx, res)
+	activerecord.Logger().Debug(ctx, foo.FooList([]*foo.Foo{res}))
 
 	return res
 }
 
 type FooProcedureMocker struct{}
+
+func GetFooProcedureMocker() FooProcedureMocker {
+	return FooProcedureMocker{}
+}
 
 func (m FooProcedureMocker) ByFixtureParams(ctx context.Context, params foo.FooParams) octopus.FixtureType {
 	return m.ByParamsMocks(ctx, params,

@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-5-g90e9b6c (Commit: 90e9b6c3)
+// Generate info: argen@v1.5.3-7-g0d63e41 (Commit: 0d63e411)
 package foo
 
 import (
@@ -62,4 +62,21 @@ func (obj *Foo) RepoSelector(ctx context.Context) (any, error) {
 	}
 
 	return data, err
+}
+
+func CallMockerLogger(params FooParams, res FooList) func() (activerecord.MockerLogger, error) {
+	return func() (activerecord.MockerLogger, error) {
+
+		mockerName := "mockerFooByParams"
+		mocker := "fixture.GetFooProcedureMocker()"
+
+		fixture := "ps := FooParams{ \n"
+		fixture += "SearchQuery: params.SearchQuery,\n"
+		fixture += "TraceID: params.TraceID,\n"
+		fixture += "}\n"
+		fixture += mocker
+		fixture += ".ByFixtureParams(ctx, ps)"
+
+		return activerecord.MockerLogger{MockerName: mockerName, Mockers: mocker, FixturesSelector: fixture, ResultName: "foo", Results: res}, nil
+	}
 }
