@@ -10,9 +10,10 @@ import (
 type ProcFieldsFoo struct {
 	SearchQuery string `ar:"input"`
 	TraceID     string `ar:"input;output"`
+	Status      int    `ar:"output"`
 	JsonRawData string `ar:"output;serializer:ServiceResponse"`
 }
 
 type SerializersFoo struct {
-	ServiceResponse *s2s.ServiceResponse `ar:"pkg:github.com/mailru/activerecord-cookbook/example/model/serializer"`
+	ServiceResponse s2s.ServiceResponse `ar:"unmarshaler:JSONUnmarshal;marshaler:JSONMarshal"`
 }

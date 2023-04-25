@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-4-gd9702e9 (Commit: d9702e9f)
+// Generate info: argen@v1.5.3-5-g90e9b6c (Commit: 90e9b6c3)
 package foo
 
 import (
@@ -13,17 +13,37 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/mailru/activerecord-cookbook/example/model/s2s"
 	"github.com/mailru/activerecord/pkg/activerecord"
 )
 
+type FooFTPK struct {
+	SearchQuery string `yaml:"search_query"`
+	TraceID     string `yaml:"trace_id"`
+}
+
 type FooFT struct {
+	Params      FooFTPK             `yaml:"params"`
+	TraceID     string              `yaml:"trace_id"`
+	Status      int                 `yaml:"status"`
+	JsonRawData s2s.ServiceResponse `yaml:"json_raw_data"`
 }
 
 func MarshalFixtures(objs []*Foo) ([]byte, error) {
 	fts := make([]FooFT, 0, len(objs))
 	for _, obj := range objs {
-		_ = obj
-		fts = append(fts, FooFT{})
+		params := obj.GetParams()
+
+		pk := FooFTPK{
+			SearchQuery: params.SearchQuery,
+			TraceID:     params.TraceID,
+		}
+		fts = append(fts, FooFT{
+			Params:      pk,
+			TraceID:     obj.GetTraceID(),
+			Status:      obj.GetStatus(),
+			JsonRawData: obj.GetJsonRawData(),
+		})
 	}
 	return yaml.Marshal(fts)
 }
@@ -38,8 +58,21 @@ func UnmarshalFixtures(source []byte) []*Foo {
 	objs := make([]*Foo, 0, len(fixtures))
 
 	for _, ft := range fixtures {
-		_ = ft
+
 		o := New(context.Background())
+		o.setParams(FooParams{
+			SearchQuery: ft.Params.SearchQuery,
+			TraceID:     ft.Params.TraceID,
+		})
+		if err := o.SetTraceID(ft.TraceID); err != nil {
+			log.Fatalf("can't set value %v to field TraceID of Foo fixture: %s", ft.TraceID, err)
+		}
+		if err := o.SetStatus(ft.Status); err != nil {
+			log.Fatalf("can't set value %v to field Status of Foo fixture: %s", ft.Status, err)
+		}
+		if err := o.SetJsonRawData(ft.JsonRawData); err != nil {
+			log.Fatalf("can't set value %v to field JsonRawData of Foo fixture: %s", ft.JsonRawData, err)
+		}
 
 		objs = append(objs, o)
 	}

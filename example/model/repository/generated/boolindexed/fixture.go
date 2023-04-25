@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-4-gd9702e9 (Commit: d9702e9f)
+// Generate info: argen@v1.5.3-5-g90e9b6c (Commit: 90e9b6c3)
 package boolindexed
 
 import (
@@ -16,6 +16,14 @@ import (
 	"github.com/mailru/activerecord/pkg/activerecord"
 	"github.com/mailru/activerecord/pkg/octopus"
 )
+
+func (objs BoolindexedList) String() string {
+	o, err := MarshalFixtures(objs)
+	if err != nil {
+		activerecord.Logger().Fatal(context.Background(), err)
+	}
+	return string(o)
+}
 
 type BoolindexedFT struct {
 	Code      string `yaml:"code"`
@@ -56,14 +64,6 @@ func UnmarshalFixtures(source []byte) []*Boolindexed {
 	}
 
 	return objs
-}
-
-func (objs BoolindexedList) String() string {
-	o, err := MarshalFixtures(objs)
-	if err != nil {
-		activerecord.Logger().Fatal(context.Background(), err)
-	}
-	return string(o)
 }
 
 type BoolindexedUpdateFT struct {

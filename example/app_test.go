@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/foo"
-	"github.com/mailru/activerecord-cookbook/example/model/s2s"
 	"github.com/mailru/activerecord/pkg/activerecord"
 	"github.com/mailru/activerecord/pkg/octopus"
 	"gotest.tools/assert"
@@ -49,33 +49,21 @@ func Test_callProc(t *testing.T) {
 	)
 
 	params := foo.FooParams{
-		SearchQuery: "who are you",
-		TraceID:     "",
+		SearchQuery: "my search",
 	}
 
-	mock := &foo.Foo{}
-	mock.SetTraceID("")
-	mock.SetJsonRawData(&s2s.ServiceResponse{
-		Status: "200",
-		Data:   "bar",
-	})
 	octopusMockServer.SetFixtures([]octopus.FixtureType{
-		fixture.FooProcedureMocker{}.ByParamsMocks(ctx, params, []octopus.MockEntities{
-			mock,
-		}),
+		fixture.FooProcedureMocker{}.ByFixtureParams(ctx, params),
 	})
 
 	res, err := foo.Call(ctx, params)
 	assert.NilError(t, err)
 
 	if res != nil {
-
-		rawJson := res.GetJsonRawData()
-		assert.Equal(t, "200", rawJson.Status)
-		assert.Equal(t, "bar", rawJson.Data)
-
-		reqID := res.GetTraceID()
-		assert.Equal(t, "", reqID)
+		assert.Equal(t, 200, res.GetStatus())
+		assert.Equal(t, 123, res.GetJsonRawData().ID)
+		assert.Equal(t, strings.Join([]string{"bar", "foo"}, ","), strings.Join(res.GetJsonRawData().List, ","))
+		assert.Equal(t, "efij", res.GetTraceID())
 	}
 
 }

@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-4-gd9702e9 (Commit: d9702e9f)
+// Generate info: argen@v1.5.3-5-g90e9b6c (Commit: 90e9b6c3)
 package foo
 
 import (
@@ -23,6 +23,12 @@ func (obj *Foo) MockSelectResponse() ([][]byte, error) {
 	var err error
 
 	data, err = packTraceID([]byte{}, obj.GetTraceID())
+	if err != nil {
+		return nil, err
+	}
+
+	tuple = append(tuple, data)
+	data, err = packStatus([]byte{}, obj.GetStatus())
 	if err != nil {
 		return nil, err
 	}
