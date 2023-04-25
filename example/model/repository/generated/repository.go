@@ -47,63 +47,6 @@ func (ns NSPackage) meta(n uint32) (SpaceMeta, bool) {
 }
 
 var NamespacePackages = NSPackage{
-	"24": {
-		PackageName: "reward",
-		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
-			obj, err := reward.TupleToStruct(ctx, tuple)
-			if err != nil {
-				return nil, fmt.Errorf("can't decode tuple: %s", err)
-			}
-
-			return reward.MarshalFixtures([]*reward.Reward{obj})
-		},
-		Fields: []FieldMeta{
-			{
-				Name:     "Code",
-				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackCode(bytes.NewReader(packedField)) },
-			},
-			{
-				Name:     "Services",
-				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackServices(bytes.NewReader(packedField)) },
-			},
-			{
-				Name:     "Partner",
-				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackPartner(bytes.NewReader(packedField)) },
-			},
-			{
-				Name:     "Extra",
-				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackExtra(bytes.NewReader(packedField)) },
-			},
-			{
-				Name:     "Flags",
-				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackFlags(bytes.NewReader(packedField)) },
-			},
-			{
-				Name:     "Unlocked",
-				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackUnlocked(bytes.NewReader(packedField)) },
-			},
-			{
-				Name:     "Description",
-				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackDescription(bytes.NewReader(packedField)) },
-			},
-		},
-		Indexes: map[string]IndexMeta{
-
-			"0.1": {
-				Name:     "Code",
-				Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexCode(packedKeys) },
-			},
-			"1.1": {
-				Name:     "Partner",
-				Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexPartner(packedKeys) },
-			},
-		},
-		PK: IndexMeta{
-
-			Name:     "Code",
-			Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexCode(packedKeys) },
-		},
-	},
 	"5": {
 		PackageName: "arobj",
 		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
@@ -317,6 +260,63 @@ var NamespacePackages = NSPackage{
 
 			Name:     "ID",
 			Unpacker: func(packedKeys [][][]byte) (any, error) { return promoperiods.UnpackKeyIndexID(packedKeys) },
+		},
+	},
+	"24": {
+		PackageName: "reward",
+		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
+			obj, err := reward.TupleToStruct(ctx, tuple)
+			if err != nil {
+				return nil, fmt.Errorf("can't decode tuple: %s", err)
+			}
+
+			return reward.MarshalFixtures([]*reward.Reward{obj})
+		},
+		Fields: []FieldMeta{
+			{
+				Name:     "Code",
+				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackCode(bytes.NewReader(packedField)) },
+			},
+			{
+				Name:     "Services",
+				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackServices(bytes.NewReader(packedField)) },
+			},
+			{
+				Name:     "Partner",
+				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackPartner(bytes.NewReader(packedField)) },
+			},
+			{
+				Name:     "Extra",
+				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackExtra(bytes.NewReader(packedField)) },
+			},
+			{
+				Name:     "Flags",
+				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackFlags(bytes.NewReader(packedField)) },
+			},
+			{
+				Name:     "Unlocked",
+				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackUnlocked(bytes.NewReader(packedField)) },
+			},
+			{
+				Name:     "Description",
+				Unpacker: func(packedField []byte) (any, error) { return reward.UnpackDescription(bytes.NewReader(packedField)) },
+			},
+		},
+		Indexes: map[string]IndexMeta{
+
+			"0.1": {
+				Name:     "Code",
+				Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexCode(packedKeys) },
+			},
+			"1.1": {
+				Name:     "Partner",
+				Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexPartner(packedKeys) },
+			},
+		},
+		PK: IndexMeta{
+
+			Name:     "Code",
+			Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexCode(packedKeys) },
 		},
 	},
 }

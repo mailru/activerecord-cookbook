@@ -3,7 +3,7 @@ module github.com/mailru/activerecord-cookbook
 go 1.19
 
 require (
-	github.com/mailru/activerecord v1.5.3
+	github.com/mailru/activerecord v1.5.4-0.20230425155229-1454a8704650
 	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools v2.2.0+incompatible
 )
@@ -18,4 +18,3 @@ require (
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324 // indirect
 )
 
-replace github.com/mailru/activerecord => ../../activerecord
