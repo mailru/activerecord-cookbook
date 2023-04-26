@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/category"
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/foo"
 	"github.com/mailru/activerecord/pkg/activerecord"
 	"github.com/mailru/activerecord/pkg/octopus"
@@ -51,8 +52,20 @@ func TestMain(m *testing.M) {
 			"arcfg.Timeout":  time.Millisecond * 200,
 		})),
 	)
+	activerecord.Logger().SetLogLevel(activerecord.DebugLoggerLevel)
 
 	m.Run()
+}
+
+func Test_callNoParamsProc(t *testing.T) {
+	ctx := context.Background()
+	octopusMockServer.SetFixtures([]octopus.FixtureType{
+		fixture.GetCategoryProcedureMocker().ByFixture(ctx),
+	})
+	res, err := category.Call(ctx)
+	assert.NilError(t, err)
+
+	assert.Equal(t, 100500, res.GetAll())
 }
 
 func Test_callProc(t *testing.T) {
@@ -69,12 +82,10 @@ func Test_callProc(t *testing.T) {
 	res, err := foo.Call(ctx, params)
 	assert.NilError(t, err)
 
-	if res != nil {
-		assert.Equal(t, 200, res.GetStatus())
-		assert.Equal(t, 123, res.GetJsonRawData().ID)
-		assert.Equal(t, strings.Join([]string{"bar", "foo"}, ","), strings.Join(res.GetJsonRawData().List, ","))
-		assert.Equal(t, "efij", res.GetTraceID())
-	}
+	assert.Equal(t, 200, res.GetStatus())
+	assert.Equal(t, 123, res.GetJsonRawData().ID)
+	assert.Equal(t, strings.Join([]string{"bar", "foo"}, ","), strings.Join(res.GetJsonRawData().List, ","))
+	assert.Equal(t, "efij", res.GetTraceID())
 
 }
 

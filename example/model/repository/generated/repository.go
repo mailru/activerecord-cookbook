@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-7-g0d63e41 (Commit: 0d63e411)
+// Generate info: argen@v1.5.3-7-g1454a87 (Commit: 1454a870)
 package repository
 
 import (
@@ -15,6 +15,7 @@ import (
 
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/arobj"
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/boolindexed"
+	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/category"
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/foo"
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/promoperiods"
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/reward"
@@ -142,6 +143,20 @@ var NamespacePackages = NSPackage{
 			Name:     "Code",
 			Unpacker: func(packedKeys [][][]byte) (any, error) { return boolindexed.UnpackKeyIndexCode(packedKeys) },
 		},
+	},
+	"quantityOfCategories": {
+		PackageName: "category",
+		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
+			obj, err := category.TupleToStruct(ctx, tuple)
+			if err != nil {
+				return nil, fmt.Errorf("can't decode tuple: %s", err)
+			}
+
+			return category.MarshalFixtures([]*category.Category{obj})
+		},
+		Fields:  []FieldMeta{},
+		Indexes: map[string]IndexMeta{},
+		PK:      IndexMeta{},
 	},
 	"foo": {
 		PackageName: "foo",

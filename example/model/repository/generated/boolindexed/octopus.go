@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-7-g0d63e41 (Commit: 0d63e411)
+// Generate info: argen@v1.5.3-7-g1454a87 (Commit: 1454a870)
 package boolindexed
 
 import (
@@ -32,78 +32,6 @@ const (
 	namespace uint32 = 25
 	cntFields uint32 = 2
 )
-
-// box - возвращает коннектор для БД
-// TODO
-// - унести в пакет pkg/octopus тут общий код нет смысла его нагенеривать
-// - сделать статистику по используемым инстансам
-// - прикрутить локальный пингер и исключать недоступные инстансы
-func box(ctx context.Context, shard int, instType activerecord.ShardInstanceType) (*octopus.Connection, error) {
-	configPath := "arcfg"
-
-	clusterInfo, err := activerecord.ConfigCacher().Get(
-		ctx,
-		configPath,
-		activerecord.MapGlobParam{
-			Timeout:  octopus.DefaultConnectionTimeout,
-			PoolSize: octopus.DefaultPoolSize,
-		},
-		func(sic activerecord.ShardInstanceConfig) (activerecord.OptionInterface, error) {
-			return octopus.NewOptions(
-				sic.Addr,
-				octopus.ServerModeType(sic.Mode),
-				octopus.WithTimeout(sic.Timeout, sic.Timeout),
-				octopus.WithPoolSize(sic.PoolSize),
-			)
-		},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("can't get cluster %s info: %w", configPath, err)
-	}
-
-	if len(clusterInfo) < int(shard) {
-		return nil, fmt.Errorf("invalid shard num %d, max = %d", shard, len(clusterInfo))
-	}
-
-	var configBox activerecord.ShardInstance
-
-	switch instType {
-	case activerecord.ReplicaInstanceType:
-		if len(clusterInfo[shard].Replicas) == 0 {
-			return nil, fmt.Errorf("replicas not set")
-		}
-
-		configBox = clusterInfo[shard].NextReplica()
-	case activerecord.ReplicaOrMasterInstanceType:
-		if len(clusterInfo[shard].Replicas) != 0 {
-			configBox = clusterInfo[shard].NextReplica()
-			break
-		}
-
-		fallthrough
-	case activerecord.MasterInstanceType:
-		configBox = clusterInfo[shard].NextMaster()
-	}
-
-	conn, err := activerecord.ConnectionCacher().GetOrAdd(configBox, func(options interface{}) (activerecord.ConnectionInterface, error) {
-		octopusOpt, ok := options.(*octopus.ConnectionOptions)
-		if !ok {
-			return nil, fmt.Errorf("invalit type of options %T, want Options", options)
-		}
-
-		return octopus.GetConnection(ctx, octopusOpt)
-	})
-	if err != nil {
-		return nil, fmt.Errorf("error from connectionCacher: %w", err)
-	}
-
-	box, ok := conn.(*octopus.Connection)
-	if !ok {
-		return nil, fmt.Errorf("invalid connection type %T, want *octopus.Connection", conn)
-	}
-
-	return box, nil
-}
 
 func New(ctx context.Context) *Boolindexed {
 	newObj := Boolindexed{}
@@ -268,7 +196,7 @@ func selectBox(ctx context.Context, indexnum uint32, keysPacked [][][]byte, limi
 
 	logger.Debug(ctx, fmt.Sprintf("Select packed tuple: '% X'", w))
 
-	connection, err := box(ctx, 0, activerecord.ReplicaOrMasterInstanceType)
+	connection, err := octopus.Box(ctx, 0, activerecord.ReplicaOrMasterInstanceType)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "select_preparebox", 1)
 		logger.Error(ctx, fmt.Sprintf("Error get box '%s'", err))
@@ -573,7 +501,7 @@ func (obj *Boolindexed) Delete(ctx context.Context) error {
 	w := octopus.PackDelete(namespace, pk)
 	log.Printf("Delete packed tuple: '%X'\n", w)
 
-	connection, err := box(ctx, 0, activerecord.MasterInstanceType)
+	connection, err := octopus.Box(ctx, 0, activerecord.MasterInstanceType)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "delete_preparebox", 1)
 		logger.Error(ctx, "Boolindexed", obj.PrimaryString(), fmt.Sprintf("Error get box '%s'", err))
@@ -650,7 +578,7 @@ func (obj *Boolindexed) Update(ctx context.Context) error {
 
 	log.Printf("Update packed tuple: '%X'\n", w)
 
-	connection, err := box(ctx, 0, activerecord.MasterInstanceType)
+	connection, err := octopus.Box(ctx, 0, activerecord.MasterInstanceType)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "update_preparebox", 1)
 		logger.Error(ctx, "Boolindexed", obj.PrimaryString(), fmt.Sprintf("Error get box '%s'", err))
@@ -777,7 +705,7 @@ func (obj *Boolindexed) insertReplace(ctx context.Context, insertMode octopus.In
 	metricTimer.Timing(ctx, "insertreplace_pack")
 	logger.Trace(ctx, "Boolindexed", obj.PrimaryString(), fmt.Sprintf("Insert packed tuple: '%X'", w))
 
-	connection, err := box(ctx, 0, activerecord.MasterInstanceType)
+	connection, err := octopus.Box(ctx, 0, activerecord.MasterInstanceType)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "insertreplace_preparebox", 1)
 		logger.Error(ctx, "Boolindexed", obj.PrimaryString(), fmt.Sprintf("Error get box '%s'", err))

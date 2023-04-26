@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-7-g0d63e41 (Commit: 0d63e411)
+// Generate info: argen@v1.5.3-7-g1454a87 (Commit: 1454a870)
 package foo
 
 import (
