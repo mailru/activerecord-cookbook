@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-7-g1454a87 (Commit: 1454a870)
+// Generate info: argen@v1.5.3-9-geaa00ca (Commit: eaa00caf)
 package foo
 
 import (
@@ -13,6 +13,7 @@ import (
 	"fmt"
 
 	"github.com/mailru/activerecord-cookbook/example/model/s2s"
+	serializerSearchQuery "github.com/mailru/activerecord-cookbook/example/model/serializer"
 	"github.com/mailru/activerecord/pkg/activerecord"
 	"github.com/mailru/activerecord/pkg/iproto/iproto"
 	"github.com/mailru/activerecord/pkg/octopus"
@@ -47,7 +48,7 @@ func (obj *Foo) GetJsonRawData() s2s.ServiceResponse {
 }
 
 type FooParams struct {
-	SearchQuery string
+	SearchQuery map[string]string
 	TraceID     string
 }
 
@@ -61,8 +62,26 @@ func (obj *Foo) setParams(params FooParams) error {
 	return nil
 }
 
-func (obj *FooParams) arrayValues() []string {
-	return []string{obj.SearchQuery, obj.TraceID}
+func (obj *FooParams) arrayValues() ([]string, error) {
+	ret := []string{}
+	pvar, err := serializerSearchQuery.SearchQueryMarshal(obj.SearchQuery)
+	if err != nil {
+		return nil, fmt.Errorf("error marshal param field SearchQuery: %w", err)
+	}
+
+	ret = append(ret, pvar...)
+	ret = append(ret, obj.TraceID)
+
+	return ret, nil
+}
+
+func (obj FooParams) PK() string {
+
+	return fmt.Sprint(
+		obj.SearchQuery,
+		obj.TraceID,
+	)
+
 }
 
 func Call(ctx context.Context, params FooParams) (*Foo, error) {
@@ -81,7 +100,15 @@ func Call(ctx context.Context, params FooParams) (*Foo, error) {
 		return nil, err
 	}
 
-	td, err := octopus.CallLua(ctx, connection, procName, params.arrayValues()...)
+	var args []string
+
+	args, err = params.arrayValues()
+	if err != nil {
+		metricErrCnt.Inc(ctx, "call_proc_preparebox", 1)
+		return nil, fmt.Errorf("Error parse args of procedure %s: %w", procName, err)
+	}
+
+	td, err := octopus.CallLua(ctx, connection, procName, args...)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "call_proc", 1)
 		return nil, fmt.Errorf("call lua procedure %s: %w", procName, err)

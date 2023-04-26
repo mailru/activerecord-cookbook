@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-7-g1454a87 (Commit: 1454a870)
+// Generate info: argen@v1.5.3-9-geaa00ca (Commit: eaa00caf)
 package category
 
 import (
@@ -47,6 +47,12 @@ func (obj *Category) setParams(params CategoryParams) error {
 	return nil
 }
 
+func (obj CategoryParams) PK() string {
+
+	return ""
+
+}
+
 func Call(ctx context.Context) (*Category, error) {
 	logger := activerecord.Logger()
 	ctx = logger.SetLoggerValueToContext(ctx, map[string]interface{}{"LuaProc": procName})
@@ -63,7 +69,9 @@ func Call(ctx context.Context) (*Category, error) {
 		return nil, err
 	}
 
-	td, err := octopus.CallLua(ctx, connection, procName)
+	var args []string
+
+	td, err := octopus.CallLua(ctx, connection, procName, args...)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "call_proc", 1)
 		return nil, fmt.Errorf("call lua procedure %s: %w", procName, err)

@@ -1,6 +1,6 @@
 - params:
-    search_query: "my search"
-    trace_id:
+    search_query:
+      name: "my name"
   trace_id: "efij"
   status: 200
   json_raw_data:

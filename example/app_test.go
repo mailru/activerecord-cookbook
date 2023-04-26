@@ -72,7 +72,7 @@ func Test_callProc(t *testing.T) {
 	ctx := context.Background()
 
 	params := foo.FooParams{
-		SearchQuery: "my search",
+		SearchQuery: map[string]string{"name": "my name"},
 	}
 
 	octopusMockServer.SetFixtures([]octopus.FixtureType{

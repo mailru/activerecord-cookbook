@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-7-g1454a87 (Commit: 1454a870)
+// Generate info: argen@v1.5.3-9-geaa00ca (Commit: eaa00caf)
 package fixture
 
 import (
@@ -20,7 +20,7 @@ import (
 )
 
 var fooOnce sync.Once
-var fooStore map[foo.FooParams]*foo.Foo
+var fooStore map[string]*foo.Foo
 
 //go:embed data/foo.yaml
 var fooSource []byte
@@ -29,12 +29,12 @@ func initFoo() {
 	fooOnce.Do(func() {
 		fixtures := foo.UnmarshalFixtures(fooSource)
 
-		fooStore = map[foo.FooParams]*foo.Foo{}
+		fooStore = map[string]*foo.Foo{}
 		for _, f := range fixtures {
-			if _, ok := fooStore[f.GetParams()]; ok {
+			if _, ok := fooStore[f.GetParams().PK()]; ok {
 				log.Fatalf("foo fixture with params %v are duplicated", f.GetParams())
 			}
-			fooStore[f.GetParams()] = f
+			fooStore[f.GetParams().PK()] = f
 		}
 	})
 }
@@ -42,7 +42,7 @@ func initFoo() {
 func GetFooByParams(params foo.FooParams) *foo.Foo {
 	initFoo()
 
-	res, ex := fooStore[params]
+	res, ex := fooStore[params.PK()]
 	if !ex {
 		log.Fatalf("Foo fixture with params %v not found", params)
 	}

@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-7-g1454a87 (Commit: 1454a870)
+// Generate info: argen@v1.5.3-9-geaa00ca (Commit: eaa00caf)
 package fixture
 
 import (
@@ -20,7 +20,7 @@ import (
 )
 
 var categoryOnce sync.Once
-var categoryStore map[category.CategoryParams]*category.Category
+var categoryStore map[string]*category.Category
 
 //go:embed data/category.yaml
 var categorySource []byte
@@ -29,12 +29,12 @@ func initCategory() {
 	categoryOnce.Do(func() {
 		fixtures := category.UnmarshalFixtures(categorySource)
 
-		categoryStore = map[category.CategoryParams]*category.Category{}
+		categoryStore = map[string]*category.Category{}
 		for _, f := range fixtures {
-			if _, ok := categoryStore[f.GetParams()]; ok {
+			if _, ok := categoryStore[f.GetParams().PK()]; ok {
 				log.Fatalf("category fixture with params %v are duplicated", f.GetParams())
 			}
-			categoryStore[f.GetParams()] = f
+			categoryStore[f.GetParams().PK()] = f
 		}
 	})
 }
@@ -42,7 +42,7 @@ func initCategory() {
 func GetCategoryByParams(params category.CategoryParams) *category.Category {
 	initCategory()
 
-	res, ex := categoryStore[params]
+	res, ex := categoryStore[params.PK()]
 	if !ex {
 		log.Fatalf("Category fixture with params %v not found", params)
 	}

@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-7-g1454a87 (Commit: 1454a870)
+// Generate info: argen@v1.5.3-9-geaa00ca (Commit: eaa00caf)
 package foo
 
 import (
@@ -48,7 +48,12 @@ func MockCallRequest(ctx context.Context, params FooParams) []byte {
 	log := activerecord.Logger()
 	ctx = log.SetLoggerValueToContext(ctx, map[string]interface{}{"MockCallRequest": params, "Proc": "Foo"})
 
-	return octopus.PackLua(procName, params.arrayValues()...)
+	args, err := params.arrayValues()
+	if err != nil {
+		activerecord.Logger().Fatal(ctx, fmt.Sprintf("Error call mock request by params: %s", err))
+	}
+
+	return octopus.PackLua(procName, args...)
 }
 
 func (obj *Foo) RepoSelector(ctx context.Context) (any, error) {

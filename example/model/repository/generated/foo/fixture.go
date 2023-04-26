@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-7-g1454a87 (Commit: 1454a870)
+// Generate info: argen@v1.5.3-9-geaa00ca (Commit: eaa00caf)
 package foo
 
 import (
@@ -18,8 +18,9 @@ import (
 )
 
 type FooFTPK struct {
-	SearchQuery string `yaml:"search_query"`
-	TraceID     string `yaml:"trace_id"`
+	SearchQuery map[string]string `yaml:"search_query"`
+
+	TraceID string `yaml:"trace_id"`
 }
 
 type FooFT struct {
