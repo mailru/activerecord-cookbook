@@ -3,7 +3,7 @@ module github.com/mailru/activerecord-cookbook
 go 1.19
 
 require (
-	github.com/mailru/activerecord v1.5.4-0.20230426071804-1f3baae573e1 // indirect
+	github.com/mailru/activerecord v1.5.4-0.20230427045742-780c28bccdef // indirect
 	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools v2.2.0+incompatible
 )

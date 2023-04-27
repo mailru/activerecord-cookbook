@@ -10,6 +10,8 @@ github.com/mailru/activerecord v1.5.4-0.20230426025756-eaa00caf118f h1:YaS7qVvsX
 github.com/mailru/activerecord v1.5.4-0.20230426025756-eaa00caf118f/go.mod h1:k4lW/lqqCene7MB9IA0VdD/pKwfe9/LzeNJXLKxoMxY=
 github.com/mailru/activerecord v1.5.4-0.20230426071804-1f3baae573e1 h1:3tdm4V/g/jeFKXp1s53JFpJ3k3NGJK5RShshFD8C7Hc=
 github.com/mailru/activerecord v1.5.4-0.20230426071804-1f3baae573e1/go.mod h1:k4lW/lqqCene7MB9IA0VdD/pKwfe9/LzeNJXLKxoMxY=
+github.com/mailru/activerecord v1.5.4-0.20230427045742-780c28bccdef h1:BBCXOxdYI4Nv/2CnYGSxWADPcSgp2l6BMahYxjEicac=
+github.com/mailru/activerecord v1.5.4-0.20230427045742-780c28bccdef/go.mod h1:k4lW/lqqCene7MB9IA0VdD/pKwfe9/LzeNJXLKxoMxY=
 github.com/mailru/mapstructure v0.0.0-20230117153631-a4140f9ccc45 h1:x3Zw96Gt6HbEPUWsTbQYj/nfaNv5lWHy6CeEkl8gwqw=
 github.com/mailru/mapstructure v0.0.0-20230117153631-a4140f9ccc45/go.mod h1:guLmlFj8yjd0hoz+QWxRU4Gn+VOb2nOQZ4EqRmMHarw=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=

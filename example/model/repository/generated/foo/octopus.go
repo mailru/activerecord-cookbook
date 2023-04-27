@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-9-geaa00ca (Commit: eaa00caf)
+// Generate info: argen@v1.5.3-12-g7f6d003 (Commit: 7f6d003b)
 package foo
 
 import (
@@ -64,13 +64,14 @@ func (obj *Foo) setParams(params FooParams) error {
 
 func (obj *FooParams) arrayValues() ([]string, error) {
 	ret := []string{}
-	pvar, err := serializerSearchQuery.SearchQueryMarshal(obj.SearchQuery)
+	pvarSearchQuery, err := serializerSearchQuery.SearchQueryMarshal(obj.SearchQuery)
 	if err != nil {
 		return nil, fmt.Errorf("error marshal param field SearchQuery: %w", err)
 	}
 
-	ret = append(ret, pvar...)
-	ret = append(ret, obj.TraceID)
+	ret = append(ret, pvarSearchQuery...)
+
+	ret = append(ret, string(obj.TraceID))
 
 	return ret, nil
 }

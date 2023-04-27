@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-9-geaa00ca (Commit: eaa00caf)
+// Generate info: argen@v1.5.3-12-g7f6d003 (Commit: 7f6d003b)
 package fixture
 
 import (
