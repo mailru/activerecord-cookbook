@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-12-g7f6d003 (Commit: 7f6d003b)
+// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
 package foo
 
 import (
@@ -23,9 +23,9 @@ import (
 // proc struct
 type Foo struct {
 	params           FooParams
-	fieldTraceID     string
 	fieldStatus      int
 	fieldJsonRawData s2s.ServiceResponse
+	fieldTraceID     string
 }
 
 type FooList []*Foo
@@ -35,16 +35,16 @@ const (
 	cntOutFields uint32 = 3
 )
 
-func (obj *Foo) GetTraceID() string {
-	return obj.fieldTraceID
-}
-
 func (obj *Foo) GetStatus() int {
 	return obj.fieldStatus
 }
 
 func (obj *Foo) GetJsonRawData() s2s.ServiceResponse {
 	return obj.fieldJsonRawData
+}
+
+func (obj *Foo) GetTraceID() string {
+	return obj.fieldTraceID
 }
 
 type FooParams struct {
@@ -93,7 +93,7 @@ func Call(ctx context.Context, params FooParams) (*Foo, error) {
 
 	metricTimer.Timing(ctx, "call_proc")
 
-	connection, err := octopus.Box(ctx, 0, activerecord.ReplicaInstanceType)
+	connection, err := octopus.Box(ctx, 0, activerecord.ReplicaInstanceType, "arcfg", nil)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "call_proc_preparebox", 1)
 		logger.Error(ctx, fmt.Sprintf("Error get box '%s'", err))
@@ -141,55 +141,28 @@ func TupleToStruct(ctx context.Context, tuple octopus.TupleData) (*Foo, error) {
 
 	np := Foo{}
 
-	valTraceID, err := UnpackTraceID(bytes.NewReader(tuple.Data[0]))
-	if err != nil {
-		return nil, err
-	}
-
-	np.fieldTraceID = valTraceID
-	valStatus, err := UnpackStatus(bytes.NewReader(tuple.Data[1]))
+	valStatus, err := UnpackStatus(bytes.NewReader(tuple.Data[0]))
 	if err != nil {
 		return nil, err
 	}
 
 	np.fieldStatus = valStatus
-	valJsonRawData, err := UnpackJsonRawData(bytes.NewReader(tuple.Data[2]))
+	valJsonRawData, err := UnpackJsonRawData(bytes.NewReader(tuple.Data[1]))
 	if err != nil {
 		return nil, err
 	}
 
 	np.fieldJsonRawData = valJsonRawData
+	valTraceID, err := UnpackTraceID(bytes.NewReader(tuple.Data[2]))
+	if err != nil {
+		return nil, err
+	}
+
+	np.fieldTraceID = valTraceID
 
 	return &np, nil
 }
 
-func (obj *Foo) SetTraceID(TraceID string) error {
-	obj.fieldTraceID = TraceID
-
-	return nil
-}
-
-func UnpackTraceID(r *bytes.Reader) (ret string, errRet error) {
-	var TraceID string
-
-	err := octopus.UnpackString(r, &TraceID, iproto.ModeDefault)
-	if err != nil {
-		errRet = fmt.Errorf("error unpack field TraceID in tuple: '%w'", err)
-		return
-	}
-
-	bvar := TraceID
-
-	svar := bvar
-
-	return svar, nil
-}
-
-func packTraceID(w []byte, TraceID string) ([]byte, error) {
-	pvar := TraceID
-
-	return octopus.PackString(w, pvar, iproto.ModeDefault), nil
-}
 func (obj *Foo) SetStatus(Status int) error {
 	obj.fieldStatus = Status
 
@@ -250,6 +223,33 @@ func packJsonRawData(w []byte, JsonRawData s2s.ServiceResponse) ([]byte, error) 
 	if err != nil {
 		return nil, fmt.Errorf("error marshal field JsonRawData: %w", err)
 	}
+
+	return octopus.PackString(w, pvar, iproto.ModeDefault), nil
+}
+func (obj *Foo) SetTraceID(TraceID string) error {
+	obj.fieldTraceID = TraceID
+
+	return nil
+}
+
+func UnpackTraceID(r *bytes.Reader) (ret string, errRet error) {
+	var TraceID string
+
+	err := octopus.UnpackString(r, &TraceID, iproto.ModeDefault)
+	if err != nil {
+		errRet = fmt.Errorf("error unpack field TraceID in tuple: '%w'", err)
+		return
+	}
+
+	bvar := TraceID
+
+	svar := bvar
+
+	return svar, nil
+}
+
+func packTraceID(w []byte, TraceID string) ([]byte, error) {
+	pvar := TraceID
 
 	return octopus.PackString(w, pvar, iproto.ModeDefault), nil
 }

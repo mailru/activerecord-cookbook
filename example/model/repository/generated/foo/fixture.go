@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-12-g7f6d003 (Commit: 7f6d003b)
+// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
 package foo
 
 import (
@@ -25,9 +25,9 @@ type FooFTPK struct {
 
 type FooFT struct {
 	Params      FooFTPK             `yaml:"params"`
-	TraceID     string              `yaml:"trace_id"`
 	Status      int                 `yaml:"status"`
 	JsonRawData s2s.ServiceResponse `yaml:"json_raw_data"`
+	TraceID     string              `yaml:"trace_id"`
 }
 
 func MarshalFixtures(objs []*Foo) ([]byte, error) {
@@ -41,9 +41,9 @@ func MarshalFixtures(objs []*Foo) ([]byte, error) {
 		}
 		fts = append(fts, FooFT{
 			Params:      pk,
-			TraceID:     obj.GetTraceID(),
 			Status:      obj.GetStatus(),
 			JsonRawData: obj.GetJsonRawData(),
+			TraceID:     obj.GetTraceID(),
 		})
 	}
 	return yaml.Marshal(fts)
@@ -65,14 +65,14 @@ func UnmarshalFixtures(source []byte) []*Foo {
 			SearchQuery: ft.Params.SearchQuery,
 			TraceID:     ft.Params.TraceID,
 		})
-		if err := o.SetTraceID(ft.TraceID); err != nil {
-			log.Fatalf("can't set value %v to field TraceID of Foo fixture: %s", ft.TraceID, err)
-		}
 		if err := o.SetStatus(ft.Status); err != nil {
 			log.Fatalf("can't set value %v to field Status of Foo fixture: %s", ft.Status, err)
 		}
 		if err := o.SetJsonRawData(ft.JsonRawData); err != nil {
 			log.Fatalf("can't set value %v to field JsonRawData of Foo fixture: %s", ft.JsonRawData, err)
+		}
+		if err := o.SetTraceID(ft.TraceID); err != nil {
+			log.Fatalf("can't set value %v to field TraceID of Foo fixture: %s", ft.TraceID, err)
 		}
 
 		objs = append(objs, o)

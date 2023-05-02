@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-12-g7f6d003 (Commit: 7f6d003b)
+// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
 package repository
 
 import (
@@ -15,8 +15,6 @@ import (
 
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/arobj"
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/boolindexed"
-	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/category"
-	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/foo"
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/promoperiods"
 	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/reward"
 	"github.com/mailru/activerecord/pkg/octopus"
@@ -48,6 +46,7 @@ func (ns NSPackage) meta(n uint32) (SpaceMeta, bool) {
 }
 
 var NamespacePackages = NSPackage{
+
 	"5": {
 		PackageName: "arobj",
 		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
@@ -105,6 +104,7 @@ var NamespacePackages = NSPackage{
 			Unpacker: func(packedKeys [][][]byte) (any, error) { return arobj.UnpackKeyIndexID(packedKeys) },
 		},
 	},
+
 	"25": {
 		PackageName: "boolindexed",
 		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
@@ -144,34 +144,7 @@ var NamespacePackages = NSPackage{
 			Unpacker: func(packedKeys [][][]byte) (any, error) { return boolindexed.UnpackKeyIndexCode(packedKeys) },
 		},
 	},
-	"quantityOfCategories": {
-		PackageName: "category",
-		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
-			obj, err := category.TupleToStruct(ctx, tuple)
-			if err != nil {
-				return nil, fmt.Errorf("can't decode tuple: %s", err)
-			}
 
-			return category.MarshalFixtures([]*category.Category{obj})
-		},
-		Fields:  []FieldMeta{},
-		Indexes: map[string]IndexMeta{},
-		PK:      IndexMeta{},
-	},
-	"foo": {
-		PackageName: "foo",
-		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
-			obj, err := foo.TupleToStruct(ctx, tuple)
-			if err != nil {
-				return nil, fmt.Errorf("can't decode tuple: %s", err)
-			}
-
-			return foo.MarshalFixtures([]*foo.Foo{obj})
-		},
-		Fields:  []FieldMeta{},
-		Indexes: map[string]IndexMeta{},
-		PK:      IndexMeta{},
-	},
 	"6": {
 		PackageName: "promoperiods",
 		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
@@ -277,6 +250,7 @@ var NamespacePackages = NSPackage{
 			Unpacker: func(packedKeys [][][]byte) (any, error) { return promoperiods.UnpackKeyIndexID(packedKeys) },
 		},
 	},
+
 	"24": {
 		PackageName: "reward",
 		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {

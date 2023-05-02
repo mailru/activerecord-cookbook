@@ -9,9 +9,9 @@ import (
 //ar:backend:octopus
 type ProcFieldsFoo struct {
 	SearchQuery []string `ar:"input;serializer:SearchQuery"`
-	TraceID     string   `ar:"input;output"`
-	Status      int      `ar:"output"`
-	JsonRawData string   `ar:"output;serializer:ServiceResponse"`
+	TraceID     string   `ar:"input;output:2"`
+	Status      int      `ar:"output:0"`
+	JsonRawData string   `ar:"output:1;serializer:ServiceResponse"`
 }
 
 type SerializersFoo struct {

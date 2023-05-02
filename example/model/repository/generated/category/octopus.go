@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-12-g7f6d003 (Commit: 7f6d003b)
+// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
 package category
 
 import (
@@ -61,7 +61,7 @@ func Call(ctx context.Context) (*Category, error) {
 
 	metricTimer.Timing(ctx, "call_proc")
 
-	connection, err := octopus.Box(ctx, 0, activerecord.ReplicaInstanceType)
+	connection, err := octopus.Box(ctx, 0, activerecord.ReplicaInstanceType, "arcfg", nil)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "call_proc_preparebox", 1)
 		logger.Error(ctx, fmt.Sprintf("Error get box '%s'", err))

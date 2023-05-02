@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-12-g7f6d003 (Commit: 7f6d003b)
+// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
 package boolindexed
 
 import (
@@ -196,7 +196,7 @@ func selectBox(ctx context.Context, indexnum uint32, keysPacked [][][]byte, limi
 
 	logger.Debug(ctx, fmt.Sprintf("Select packed tuple: '% X'", w))
 
-	connection, err := octopus.Box(ctx, 0, activerecord.ReplicaOrMasterInstanceType)
+	connection, err := octopus.Box(ctx, 0, activerecord.ReplicaOrMasterInstanceType, "arcfg", nil)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "select_preparebox", 1)
 		logger.Error(ctx, fmt.Sprintf("Error get box '%s'", err))
@@ -501,7 +501,7 @@ func (obj *Boolindexed) Delete(ctx context.Context) error {
 	w := octopus.PackDelete(namespace, pk)
 	log.Printf("Delete packed tuple: '%X'\n", w)
 
-	connection, err := octopus.Box(ctx, 0, activerecord.MasterInstanceType)
+	connection, err := octopus.Box(ctx, 0, activerecord.MasterInstanceType, "arcfg", nil)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "delete_preparebox", 1)
 		logger.Error(ctx, "Boolindexed", obj.PrimaryString(), fmt.Sprintf("Error get box '%s'", err))
@@ -578,7 +578,7 @@ func (obj *Boolindexed) Update(ctx context.Context) error {
 
 	log.Printf("Update packed tuple: '%X'\n", w)
 
-	connection, err := octopus.Box(ctx, 0, activerecord.MasterInstanceType)
+	connection, err := octopus.Box(ctx, 0, activerecord.MasterInstanceType, "arcfg", nil)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "update_preparebox", 1)
 		logger.Error(ctx, "Boolindexed", obj.PrimaryString(), fmt.Sprintf("Error get box '%s'", err))
@@ -705,7 +705,7 @@ func (obj *Boolindexed) insertReplace(ctx context.Context, insertMode octopus.In
 	metricTimer.Timing(ctx, "insertreplace_pack")
 	logger.Trace(ctx, "Boolindexed", obj.PrimaryString(), fmt.Sprintf("Insert packed tuple: '%X'", w))
 
-	connection, err := octopus.Box(ctx, 0, activerecord.MasterInstanceType)
+	connection, err := octopus.Box(ctx, 0, activerecord.MasterInstanceType, "arcfg", nil)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "insertreplace_preparebox", 1)
 		logger.Error(ctx, "Boolindexed", obj.PrimaryString(), fmt.Sprintf("Error get box '%s'", err))
