@@ -2,11 +2,16 @@ package main
 
 import (
 	"context"
+	"log"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/category"
+	"github.com/mailru/activerecord-cookbook/example/model/repository/generated/foo"
 	"github.com/mailru/activerecord/pkg/activerecord"
 	"github.com/mailru/activerecord/pkg/octopus"
+	"gotest.tools/assert"
 
 	"github.com/mailru/activerecord-cookbook/example/model/ds"
 	repository "github.com/mailru/activerecord-cookbook/example/model/repository/generated"
@@ -14,23 +19,28 @@ import (
 	"github.com/mailru/activerecord-cookbook/example/testutil/fixture"
 )
 
-func Test_main(t *testing.T) {
-	ctx := context.Background()
+var octopusMockServer *octopus.MockServer
 
-	octopusMockServer, err := octopus.InitMockServer(octopus.WithLogger(&octopus.DefaultLogger{DebugMeta: repository.NamespacePackages}))
+func TestMain(m *testing.M) {
+	var err error
+	octopusMockServer, err = octopus.InitMockServer(octopus.WithLogger(&octopus.DefaultLogger{DebugMeta: repository.NamespacePackages}))
 	if err != nil {
-		t.Errorf("can't start server: %s", err)
+		log.Printf("can't start server: %s", err)
+
+		return
 	}
 
 	err = octopusMockServer.Start()
 	if err != nil {
-		t.Errorf("can't start server: %s", err)
+		log.Printf("can't start server: %s", err)
+
+		return
 	}
 
 	defer func() {
 		err = octopusMockServer.Stop()
 		if err != nil {
-			t.Errorf("can't stop server: %s", err)
+			log.Printf("can't stop server: %s", err)
 		}
 	}()
 
@@ -42,6 +52,45 @@ func Test_main(t *testing.T) {
 			"arcfg.Timeout":  time.Millisecond * 200,
 		})),
 	)
+	activerecord.Logger().SetLogLevel(activerecord.DebugLoggerLevel)
+
+	m.Run()
+}
+
+func Test_callNoParamsProc(t *testing.T) {
+	ctx := context.Background()
+	octopusMockServer.SetFixtures([]octopus.FixtureType{
+		fixture.GetCategoryProcedureMocker().ByFixture(ctx),
+	})
+	res, err := category.Call(ctx)
+	assert.NilError(t, err)
+
+	assert.Equal(t, 100500, res.GetAll())
+}
+
+func Test_callProc(t *testing.T) {
+	ctx := context.Background()
+
+	params := foo.FooParams{
+		SearchQuery: map[string]string{"name": "my name"},
+	}
+
+	octopusMockServer.SetFixtures([]octopus.FixtureType{
+		fixture.GetFooProcedureMocker().ByFixtureParams(ctx, params),
+	})
+
+	res, err := foo.Call(ctx, params)
+	assert.NilError(t, err)
+
+	assert.Equal(t, 200, res.GetStatus())
+	assert.Equal(t, 123, res.GetJsonRawData().ID)
+	assert.Equal(t, strings.Join([]string{"bar", "foo"}, ","), strings.Join(res.GetJsonRawData().List, ","))
+	assert.Equal(t, "efij", res.GetTraceID())
+
+}
+
+func Test_main(t *testing.T) {
+	ctx := context.Background()
 
 	rewardByCodeMocker := fixture.GetRewardByCodeMocker()
 

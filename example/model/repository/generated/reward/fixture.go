@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3 (Commit: e0ffb560)
+// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
 package reward
 
 import (
@@ -17,6 +17,14 @@ import (
 	"github.com/mailru/activerecord/pkg/activerecord"
 	"github.com/mailru/activerecord/pkg/octopus"
 )
+
+func (objs RewardList) String() string {
+	o, err := MarshalFixtures(objs)
+	if err != nil {
+		activerecord.Logger().Fatal(context.Background(), err)
+	}
+	return string(o)
+}
 
 type RewardFT struct {
 	Code        string                 `yaml:"code"`
@@ -82,14 +90,6 @@ func UnmarshalFixtures(source []byte) []*Reward {
 	}
 
 	return objs
-}
-
-func (objs RewardList) String() string {
-	o, err := MarshalFixtures(objs)
-	if err != nil {
-		activerecord.Logger().Fatal(context.Background(), err)
-	}
-	return string(o)
 }
 
 type RewardUpdateFT struct {

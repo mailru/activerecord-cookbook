@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3 (Commit: e0ffb560)
+// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
 package arobj
 
 import (
@@ -38,78 +38,6 @@ const (
 	namespace uint32 = 5
 	cntFields uint32 = 5
 )
-
-// box - возвращает коннектор для БД
-// TODO
-// - унести в пакет pkg/octopus тут общий код нет смысла его нагенеривать
-// - сделать статистику по используемым инстансам
-// - прикрутить локальный пингер и исключать недоступные инстансы
-func box(ctx context.Context, shard int, instType activerecord.ShardInstanceType) (*octopus.Connection, error) {
-	configPath := "box1"
-
-	clusterInfo, err := activerecord.ConfigCacher().Get(
-		ctx,
-		configPath,
-		activerecord.MapGlobParam{
-			Timeout:  octopus.DefaultConnectionTimeout,
-			PoolSize: octopus.DefaultPoolSize,
-		},
-		func(sic activerecord.ShardInstanceConfig) (activerecord.OptionInterface, error) {
-			return octopus.NewOptions(
-				sic.Addr,
-				octopus.ServerModeType(sic.Mode),
-				octopus.WithTimeout(sic.Timeout, sic.Timeout),
-				octopus.WithPoolSize(sic.PoolSize),
-			)
-		},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("can't get cluster %s info: %w", configPath, err)
-	}
-
-	if len(clusterInfo) < int(shard) {
-		return nil, fmt.Errorf("invalid shard num %d, max = %d", shard, len(clusterInfo))
-	}
-
-	var configBox activerecord.ShardInstance
-
-	switch instType {
-	case activerecord.ReplicaInstanceType:
-		if len(clusterInfo[shard].Replicas) == 0 {
-			return nil, fmt.Errorf("replicas not set")
-		}
-
-		configBox = clusterInfo[shard].NextReplica()
-	case activerecord.ReplicaOrMasterInstanceType:
-		if len(clusterInfo[shard].Replicas) != 0 {
-			configBox = clusterInfo[shard].NextReplica()
-			break
-		}
-
-		fallthrough
-	case activerecord.MasterInstanceType:
-		configBox = clusterInfo[shard].NextMaster()
-	}
-
-	conn, err := activerecord.ConnectionCacher().GetOrAdd(configBox, func(options interface{}) (activerecord.ConnectionInterface, error) {
-		octopusOpt, ok := options.(*octopus.ConnectionOptions)
-		if !ok {
-			return nil, fmt.Errorf("invalit type of options %T, want Options", options)
-		}
-
-		return octopus.GetConnection(ctx, octopusOpt)
-	})
-	if err != nil {
-		return nil, fmt.Errorf("error from connectionCacher: %w", err)
-	}
-
-	box, ok := conn.(*octopus.Connection)
-	if !ok {
-		return nil, fmt.Errorf("invalid connection type %T, want *octopus.Connection", conn)
-	}
-
-	return box, nil
-}
 
 func New(ctx context.Context) *ArObj {
 	newObj := ArObj{}
@@ -470,7 +398,7 @@ func selectBox(ctx context.Context, indexnum uint32, keysPacked [][][]byte, limi
 
 	logger.Debug(ctx, fmt.Sprintf("Select packed tuple: '% X'", w))
 
-	connection, err := box(ctx, 0, activerecord.ReplicaOrMasterInstanceType)
+	connection, err := octopus.Box(ctx, 0, activerecord.ReplicaOrMasterInstanceType, "arcfg", nil)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "select_preparebox", 1)
 		logger.Error(ctx, fmt.Sprintf("Error get box '%s'", err))
@@ -533,6 +461,8 @@ func selectBox(ctx context.Context, indexnum uint32, keysPacked [][][]byte, limi
 
 	return nps, nil
 }
+
+// indexes
 
 func (obj *ArObj) Primary() int32 {
 
@@ -849,6 +779,8 @@ func SelectByTypePart(ctx context.Context, key string, limiter activerecord.Sele
 	return selected, nil
 }
 
+// end indexes
+
 func (obj *ArObj) Equal(anotherObjI any) bool {
 	anotherObj, ok := anotherObjI.(*ArObj)
 	if !ok {
@@ -978,7 +910,7 @@ func (obj *ArObj) Delete(ctx context.Context) error {
 	w := octopus.PackDelete(namespace, pk)
 	log.Printf("Delete packed tuple: '%X'\n", w)
 
-	connection, err := box(ctx, 0, activerecord.MasterInstanceType)
+	connection, err := octopus.Box(ctx, 0, activerecord.MasterInstanceType, "arcfg", nil)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "delete_preparebox", 1)
 		logger.Error(ctx, "ArObj", obj.PrimaryString(), fmt.Sprintf("Error get box '%s'", err))
@@ -1055,7 +987,7 @@ func (obj *ArObj) Update(ctx context.Context) error {
 
 	log.Printf("Update packed tuple: '%X'\n", w)
 
-	connection, err := box(ctx, 0, activerecord.MasterInstanceType)
+	connection, err := octopus.Box(ctx, 0, activerecord.MasterInstanceType, "arcfg", nil)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "update_preparebox", 1)
 		logger.Error(ctx, "ArObj", obj.PrimaryString(), fmt.Sprintf("Error get box '%s'", err))
@@ -1206,7 +1138,7 @@ func (obj *ArObj) insertReplace(ctx context.Context, insertMode octopus.InsertMo
 	metricTimer.Timing(ctx, "insertreplace_pack")
 	logger.Trace(ctx, "ArObj", obj.PrimaryString(), fmt.Sprintf("Insert packed tuple: '%X'", w))
 
-	connection, err := box(ctx, 0, activerecord.MasterInstanceType)
+	connection, err := octopus.Box(ctx, 0, activerecord.MasterInstanceType, "arcfg", nil)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "insertreplace_preparebox", 1)
 		logger.Error(ctx, "ArObj", obj.PrimaryString(), fmt.Sprintf("Error get box '%s'", err))

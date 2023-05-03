@@ -1,0 +1,10 @@
+- params:
+    search_query:
+      name: "my name"
+  trace_id: "efij"
+  status: 200
+  json_raw_data:
+    id: 123
+    list:
+      - "bar"
+      - foo
