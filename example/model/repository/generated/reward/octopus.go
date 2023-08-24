@@ -15,15 +15,23 @@ import (
 
 	"strings"
 
+	"github.com/mailru/activerecord-cookbook/example/model/conv"
 	"github.com/mailru/activerecord-cookbook/example/model/ds"
 	"github.com/mailru/activerecord/pkg/activerecord"
 	"github.com/mailru/activerecord/pkg/iproto/iproto"
 	"github.com/mailru/activerecord/pkg/octopus"
 	serializerExtra "github.com/mailru/activerecord/pkg/serializer"
+	"github.com/pkg/errors"
 )
+
+type Mutators struct {
+	Extra    octopus.MutatorField
+	Unlocked octopus.MutatorField
+}
 
 type Reward struct {
 	octopus.BaseField
+	Mutators
 	fieldCode        string
 	fieldServices    *ds.Services
 	fieldPartner     string
@@ -45,6 +53,8 @@ func New(ctx context.Context) *Reward {
 	newObj.BaseField.UpdateOps = []octopus.Ops{}
 	newObj.BaseField.ExtraFields = [][]byte{}
 	newObj.BaseField.Objects = map[string][]octopus.ModelStruct{}
+	newObj.Extra.OpFunc = map[octopus.OpCode]string{octopus.OpUpdate: "ar.lua.updateExtra"}
+	newObj.Extra.PartialFields = map[string]any{}
 
 	return &newObj
 }
@@ -339,6 +349,66 @@ func (obj *Reward) SetExtra(Extra *ds.Extra) error {
 
 	obj.BaseField.UpdateOps = append(obj.BaseField.UpdateOps, octopus.Ops{Field: 3, Op: octopus.OpSet, Value: data})
 	obj.fieldExtra = Extra
+
+	return nil
+}
+
+func (obj *Reward) SetExtraPrepaid(prepaid bool) {
+	obj.Mutators.Extra.PartialFields["prepaid"] = prepaid
+}
+
+func (obj *Reward) SetExtraTitle(title string) {
+	obj.Mutators.Extra.PartialFields["title"] = title
+}
+
+func (obj *Reward) SetUnlockedAndroid(android string) {
+	obj.Mutators.Extra.PartialFields["android"] = android
+}
+
+func (obj *Reward) SetUnlockedIos(ios string) {
+	obj.Mutators.Extra.PartialFields["ios"] = ios
+}
+
+func (obj *Reward) SetUnlockedWeb(web string) {
+	obj.Mutators.Extra.PartialFields["web"] = web
+}
+
+func (obj *Reward) SetUnlockedHuawei(huawei string) {
+	obj.Mutators.Extra.PartialFields["huawei"] = huawei
+}
+
+func (obj *Reward) packPartialExtra(op octopus.OpCode) error {
+	mutatorArgs := conv.UpdateExtra(obj.fieldExtra, obj.Mutators.Extra.PartialFields)
+
+	if len(mutatorArgs) == 0 {
+		return nil
+	}
+
+	data := octopus.PackLua(obj.Mutators.Extra.OpFunc[op], append([]string{obj.PrimaryString()}, mutatorArgs...)...)
+
+	logger := activerecord.Logger()
+
+	logger.Warn(context.TODO(), "Reward", obj.PrimaryString(), fmt.Sprintf("Size for field 'Extra' not set. Cur field size: %d. Object: 'Reward'", len(data)))
+
+	obj.BaseField.UpdateOps = append(obj.BaseField.UpdateOps, octopus.Ops{Field: 3, Op: op, Value: data})
+
+	return nil
+}
+
+func (obj *Reward) packPartialUnlocked(op octopus.OpCode) error {
+	mutatorArgs := conv.UpdateUnlocked(obj.fieldUnlocked, obj.Mutators.Unlocked.PartialFields)
+
+	if len(mutatorArgs) == 0 {
+		return nil
+	}
+
+	data := octopus.PackLua(obj.Mutators.Extra.OpFunc[op], append([]string{obj.PrimaryString()}, mutatorArgs...)...)
+
+	logger := activerecord.Logger()
+
+	logger.Warn(context.TODO(), "Reward", obj.PrimaryString(), fmt.Sprintf("Size for field 'Unlocked' not set. Cur field size: %d. Object: 'Reward'", len(data)))
+
+	obj.BaseField.UpdateOps = append(obj.BaseField.UpdateOps, octopus.Ops{Field: 5, Op: op, Value: data})
 
 	return nil
 }
@@ -979,13 +1049,34 @@ func (obj *Reward) Update(ctx context.Context) error {
 		return nil
 	}
 
+	if err := obj.packPartialExtra(octopus.OpUpdate); err != nil {
+		metricErrCnt.Inc(ctx, "update_packpk", 1)
+		return fmt.Errorf("error unlocked update: %w", err)
+	}
+
+	if err := obj.packPartialUnlocked(octopus.OpUpdate); err != nil {
+		metricErrCnt.Inc(ctx, "update_packpk", 1)
+		return fmt.Errorf("error extra update: %w", err)
+	}
+
+	updateOps := make([]octopus.Ops, 0, len(obj.BaseField.UpdateOps))
+	updateMutatorOps := make([]octopus.Ops, 0, len(obj.BaseField.UpdateOps))
+	for _, update := range obj.BaseField.UpdateOps {
+		switch update.Op {
+		case octopus.OpUpdate:
+			updateMutatorOps = append(updateMutatorOps, update)
+		default:
+			updateOps = append(updateOps, update)
+		}
+	}
+
 	pk, err := obj.packPk()
 	if err != nil {
 		metricErrCnt.Inc(ctx, "update_packpk", 1)
 		return fmt.Errorf("error update: %w", err)
 	}
 
-	w := octopus.PackUpdate(namespace, pk, obj.BaseField.UpdateOps)
+	w := octopus.PackUpdate(namespace, pk, updateOps)
 
 	log.Printf("Update packed tuple: '%X'\n", w)
 
@@ -1012,6 +1103,22 @@ func (obj *Reward) Update(ctx context.Context) error {
 		metricErrCnt.Inc(ctx, "update_resp", 1)
 		logger.Error(ctx, "Reward", obj.PrimaryString(), "Error parse response: ", err)
 		return err
+	}
+
+	if len(updateMutatorOps) > 0 {
+		for _, op := range updateMutatorOps {
+			resp, errCall := connection.Call(ctx, octopus.RequestTypeCall, op.Value)
+			if errCall != nil {
+				metricErrCnt.Inc(ctx, "update_box", 1)
+				logger.Error(ctx, "Reward", obj.PrimaryString(), "Error update ia a box", errCall, connection.Info())
+				return errCall
+			}
+
+			_, err := octopus.ProcessResp(resp, 0)
+			if err != nil {
+				return errors.Wrap(err, "error unpack lua response")
+			}
+		}
 	}
 
 	obj.BaseField.UpdateOps = []octopus.Ops{}
