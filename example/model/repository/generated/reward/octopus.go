@@ -15,7 +15,6 @@ import (
 
 	"strings"
 
-	"github.com/mailru/activerecord-cookbook/example/model/conv"
 	"github.com/mailru/activerecord-cookbook/example/model/ds"
 	"github.com/mailru/activerecord/pkg/activerecord"
 	"github.com/mailru/activerecord/pkg/iproto/iproto"
@@ -53,8 +52,10 @@ func New(ctx context.Context) *Reward {
 	newObj.BaseField.UpdateOps = []octopus.Ops{}
 	newObj.BaseField.ExtraFields = [][]byte{}
 	newObj.BaseField.Objects = map[string][]octopus.ModelStruct{}
-	newObj.Extra.OpFunc = map[octopus.OpCode]string{octopus.OpUpdate: "ar.lua.updateExtra"}
+	newObj.Extra.OpFunc = map[octopus.OpCode]string{octopus.OpUpdate: "lua.updateExtra"}
 	newObj.Extra.PartialFields = map[string]any{}
+	newObj.Unlocked.OpFunc = map[octopus.OpCode]string{octopus.OpUpdate: "lua.updateUnlocked"}
+	newObj.Unlocked.PartialFields = map[string]any{}
 
 	return &newObj
 }
@@ -378,7 +379,7 @@ func (obj *Reward) SetUnlockedHuawei(huawei string) {
 }
 
 func (obj *Reward) packPartialExtra(op octopus.OpCode) error {
-	mutatorArgs := conv.UpdateExtra(obj.fieldExtra, obj.Mutators.Extra.PartialFields)
+	mutatorArgs := ds.UpdateExtra(obj.fieldExtra, obj.Mutators.Extra.PartialFields)
 
 	if len(mutatorArgs) == 0 {
 		return nil
@@ -396,7 +397,7 @@ func (obj *Reward) packPartialExtra(op octopus.OpCode) error {
 }
 
 func (obj *Reward) packPartialUnlocked(op octopus.OpCode) error {
-	mutatorArgs := conv.UpdateUnlocked(obj.fieldUnlocked, obj.Mutators.Unlocked.PartialFields)
+	mutatorArgs := ds.UpdateUnlocked(obj.fieldUnlocked, obj.Mutators.Unlocked.PartialFields)
 
 	if len(mutatorArgs) == 0 {
 		return nil

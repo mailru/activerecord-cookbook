@@ -30,3 +30,11 @@ type ServiceUnlocked struct {
 	Web     string
 	Huawei  string
 }
+
+func UpdateExtra(extra *Extra, partialExtra map[string]any) []string {
+	return nil
+}
+
+func UpdateUnlocked(unlocked ServiceUnlocked, partialUnlocked map[string]any) []string {
+	return nil
+}
