@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
+// Generate info: argen@v1.8.5-1-gaa389f8 (Commit: aa389f82)
 package promoperiods
 
 import (
@@ -405,6 +405,15 @@ func (obj *Promoperiods) SetStart(Start int32) error {
 	return nil
 }
 
+func MarshalFinish(Finish *dictionary.Product) (any, error) {
+	pvar, err := serializerProduct.ProductMarshal(Finish)
+	if err != nil {
+		return nil, fmt.Errorf("error marshal field Finish: %w", err)
+	}
+
+	return pvar, nil
+}
+
 func packFinish(w []byte, Finish *dictionary.Product) ([]byte, error) {
 	pvar, err := serializerProduct.ProductMarshal(Finish)
 	if err != nil {
@@ -492,6 +501,15 @@ func (obj *Promoperiods) SetAction(Action string) error {
 	obj.fieldAction = Action
 
 	return nil
+}
+
+func MarshalPlatform(Platform map[string]interface{}) (any, error) {
+	pvar, err := serializerJSON.JSONMarshal(Platform)
+	if err != nil {
+		return nil, fmt.Errorf("error marshal field Platform: %w", err)
+	}
+
+	return pvar, nil
 }
 
 func packPlatform(w []byte, Platform map[string]interface{}) ([]byte, error) {
@@ -803,6 +821,15 @@ func (obj *Promoperiods) SetPlanType(PlanType string) error {
 	return nil
 }
 
+func MarshalPrice(Price float64) (any, error) {
+	pvar, err := serializerJSON.PrintfMarshal("%.2f", Price)
+	if err != nil {
+		return nil, fmt.Errorf("error marshal field Price: %w", err)
+	}
+
+	return pvar, nil
+}
+
 func packPrice(w []byte, Price float64) ([]byte, error) {
 	pvar, err := serializerJSON.PrintfMarshal("%.2f", Price)
 	if err != nil {
@@ -1034,7 +1061,7 @@ func UnpackKeyIndexCode(packedKeys [][][]byte) ([]string, error) {
 
 	for _, packedKey := range packedKeys {
 
-		newIField, err := UnpackCode(bytes.NewReader(packedKey[1]))
+		newIField, err := UnpackCode(bytes.NewReader(packedKey[0]))
 		if err != nil {
 			return nil, fmt.Errorf("can't unpack index: %s", err)
 		}
@@ -1099,7 +1126,7 @@ func UnpackKeyIndexEmail(packedKeys [][][]byte) ([]string, error) {
 
 	for _, packedKey := range packedKeys {
 
-		newIField, err := UnpackEmail(bytes.NewReader(packedKey[2]))
+		newIField, err := UnpackEmail(bytes.NewReader(packedKey[0]))
 		if err != nil {
 			return nil, fmt.Errorf("can't unpack index: %s", err)
 		}
@@ -1475,7 +1502,7 @@ func UnpackKeyIndexEmailPart(packedKeys [][][]byte) ([]string, error) {
 
 	for _, packedKey := range packedKeys {
 
-		newIField, err := UnpackEmail(bytes.NewReader(packedKey[6]))
+		newIField, err := UnpackEmail(bytes.NewReader(packedKey[0]))
 		if err != nil {
 			return nil, fmt.Errorf("can't unpack index: %s", err)
 		}

@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
+// Generate info: argen@v1.8.5-1-gaa389f8 (Commit: aa389f82)
 package boolindexed
 
 import (
@@ -362,7 +362,7 @@ func UnpackKeyIndexInvisible(packedKeys [][][]byte) ([]bool, error) {
 
 	for _, packedKey := range packedKeys {
 
-		newIField, err := UnpackInvisible(bytes.NewReader(packedKey[1]))
+		newIField, err := UnpackInvisible(bytes.NewReader(packedKey[0]))
 		if err != nil {
 			return nil, fmt.Errorf("can't unpack index: %s", err)
 		}

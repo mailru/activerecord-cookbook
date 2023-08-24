@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
+// Generate info: argen@v1.8.5-1-gaa389f8 (Commit: aa389f82)
 package foo
 
 import (
@@ -77,15 +77,18 @@ func (obj *FooParams) arrayValues() ([]string, error) {
 }
 
 func (obj FooParams) PK() string {
-
-	return fmt.Sprint(
-		obj.SearchQuery,
-		obj.TraceID,
-	)
-
+	return fmt.Sprint(obj.arrayValues())
 }
 
 func Call(ctx context.Context, params FooParams) (*Foo, error) {
+	return call(ctx, params, activerecord.ReplicaOrMasterInstanceType)
+}
+
+func CallOnMaster(ctx context.Context, params FooParams) (*Foo, error) {
+	return call(ctx, params, activerecord.MasterInstanceType)
+}
+
+func call(ctx context.Context, params FooParams, instanceType activerecord.ShardInstanceType) (*Foo, error) {
 	logger := activerecord.Logger()
 	ctx = logger.SetLoggerValueToContext(ctx, map[string]interface{}{"LuaProc": procName})
 	metricTimer := activerecord.Metric().Timer("octopus", "Foo")
@@ -93,7 +96,7 @@ func Call(ctx context.Context, params FooParams) (*Foo, error) {
 
 	metricTimer.Timing(ctx, "call_proc")
 
-	connection, err := octopus.Box(ctx, 0, activerecord.ReplicaInstanceType, "arcfg", nil)
+	connection, err := octopus.Box(ctx, 0, instanceType, "arcfg", nil)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "call_proc_preparebox", 1)
 		logger.Error(ctx, fmt.Sprintf("Error get box '%s'", err))

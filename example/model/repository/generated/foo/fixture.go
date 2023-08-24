@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
+// Generate info: argen@v1.8.5-1-gaa389f8 (Commit: aa389f82)
 package foo
 
 import (
@@ -87,4 +87,8 @@ func (objs FooList) String() string {
 		activerecord.Logger().Fatal(context.Background(), err)
 	}
 	return string(o)
+}
+
+func UnmarshalDeleteFixtures(source []byte) []*Foo {
+	return UnmarshalFixtures(source)
 }

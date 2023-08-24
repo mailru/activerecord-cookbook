@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
+// Generate info: argen@v1.8.5-1-gaa389f8 (Commit: aa389f82)
 package reward
 
 import (
@@ -247,6 +247,24 @@ func (obj *Reward) MockUpdate(ctx context.Context) []byte {
 	w := octopus.PackUpdate(namespace, pk, obj.BaseField.UpdateOps)
 
 	log.Debug(ctx, fmt.Sprintf("Update packed tuple: '%X'\n", w))
+
+	return w
+}
+
+func (obj *Reward) MockDelete(ctx context.Context) []byte {
+	log := activerecord.Logger()
+
+	ctx = log.SetLoggerValueToContext(ctx, map[string]interface{}{"MockDelete": obj.PrimaryString(), "Repo": "Reward"})
+
+	pk, err := obj.packPk()
+	if err != nil {
+		log.Fatal(ctx, err)
+		return nil
+	}
+
+	w := octopus.PackDelete(namespace, pk)
+
+	log.Debug(ctx, fmt.Sprintf("Delete packed tuple: '%X'\n", w))
 
 	return w
 }

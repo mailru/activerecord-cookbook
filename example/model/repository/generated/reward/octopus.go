@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
+// Generate info: argen@v1.8.5-1-gaa389f8 (Commit: aa389f82)
 package reward
 
 import (
@@ -181,6 +181,15 @@ func (obj *Reward) SetCode(Code string) error {
 	return nil
 }
 
+func MarshalServices(Services *ds.Services) (any, error) {
+	pvar, err := serializerExtra.MapstructureMarshal(Services)
+	if err != nil {
+		return nil, fmt.Errorf("error marshal field Services: %w", err)
+	}
+
+	return pvar, nil
+}
+
 func packServices(w []byte, Services *ds.Services) ([]byte, error) {
 	pvar, err := serializerExtra.MapstructureMarshal(Services)
 	if err != nil {
@@ -274,6 +283,15 @@ func (obj *Reward) SetPartner(Partner string) error {
 	return nil
 }
 
+func MarshalExtra(Extra *ds.Extra) (any, error) {
+	pvar, err := serializerExtra.MapstructureMarshal(Extra)
+	if err != nil {
+		return nil, fmt.Errorf("error marshal field Extra: %w", err)
+	}
+
+	return pvar, nil
+}
+
 func packExtra(w []byte, Extra *ds.Extra) ([]byte, error) {
 	pvar, err := serializerExtra.MapstructureMarshal(Extra)
 	if err != nil {
@@ -323,6 +341,15 @@ func (obj *Reward) SetExtra(Extra *ds.Extra) error {
 	obj.fieldExtra = Extra
 
 	return nil
+}
+
+func MarshalFlags(Flags map[string]interface{}) (any, error) {
+	pvar, err := serializerExtra.JSONMarshal(Flags)
+	if err != nil {
+		return nil, fmt.Errorf("error marshal field Flags: %w", err)
+	}
+
+	return pvar, nil
 }
 
 func packFlags(w []byte, Flags map[string]interface{}) ([]byte, error) {
@@ -376,6 +403,15 @@ func (obj *Reward) SetFlags(Flags map[string]interface{}) error {
 	return nil
 }
 
+func MarshalUnlocked(Unlocked ds.ServiceUnlocked) (any, error) {
+	pvar, err := serializerExtra.JSONMarshal(Unlocked)
+	if err != nil {
+		return nil, fmt.Errorf("error marshal field Unlocked: %w", err)
+	}
+
+	return pvar, nil
+}
+
 func packUnlocked(w []byte, Unlocked ds.ServiceUnlocked) ([]byte, error) {
 	pvar, err := serializerExtra.JSONMarshal(Unlocked)
 	if err != nil {
@@ -425,6 +461,15 @@ func (obj *Reward) SetUnlocked(Unlocked ds.ServiceUnlocked) error {
 	obj.fieldUnlocked = Unlocked
 
 	return nil
+}
+
+func MarshalDescription(Description *string) (any, error) {
+	pvar, err := serializerExtra.JSONMarshal(Description)
+	if err != nil {
+		return nil, fmt.Errorf("error marshal field Description: %w", err)
+	}
+
+	return pvar, nil
 }
 
 func packDescription(w []byte, Description *string) ([]byte, error) {
@@ -658,7 +703,7 @@ func UnpackKeyIndexPartner(packedKeys [][][]byte) ([]string, error) {
 
 	for _, packedKey := range packedKeys {
 
-		newIField, err := UnpackPartner(bytes.NewReader(packedKey[1]))
+		newIField, err := UnpackPartner(bytes.NewReader(packedKey[0]))
 		if err != nil {
 			return nil, fmt.Errorf("can't unpack index: %s", err)
 		}

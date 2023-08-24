@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
+// Generate info: argen@v1.8.5-1-gaa389f8 (Commit: aa389f82)
 package category
 
 import (
@@ -48,12 +48,18 @@ func (obj *Category) setParams(params CategoryParams) error {
 }
 
 func (obj CategoryParams) PK() string {
-
-	return ""
-
+	return fmt.Sprint()
 }
 
 func Call(ctx context.Context) (*Category, error) {
+	return call(ctx, activerecord.ReplicaOrMasterInstanceType)
+}
+
+func CallOnMaster(ctx context.Context) (*Category, error) {
+	return call(ctx, activerecord.MasterInstanceType)
+}
+
+func call(ctx context.Context, instanceType activerecord.ShardInstanceType) (*Category, error) {
 	logger := activerecord.Logger()
 	ctx = logger.SetLoggerValueToContext(ctx, map[string]interface{}{"LuaProc": procName})
 	metricTimer := activerecord.Metric().Timer("octopus", "Category")
@@ -61,7 +67,7 @@ func Call(ctx context.Context) (*Category, error) {
 
 	metricTimer.Timing(ctx, "call_proc")
 
-	connection, err := octopus.Box(ctx, 0, activerecord.ReplicaInstanceType, "arcfg", nil)
+	connection, err := octopus.Box(ctx, 0, instanceType, "arcfg", nil)
 	if err != nil {
 		metricErrCnt.Inc(ctx, "call_proc_preparebox", 1)
 		logger.Error(ctx, fmt.Sprintf("Error get box '%s'", err))
