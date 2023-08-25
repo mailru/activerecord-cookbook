@@ -290,7 +290,7 @@ func (obj *Reward) SetPartner(Partner string) error {
 
 	obj.BaseField.UpdateOps = append(obj.BaseField.UpdateOps, octopus.Ops{Field: 2, Op: octopus.OpSet, Value: data})
 
-	mutatorArgs, err := ds.UpdateRewardPartner(obj.fieldPartner, "param1", "param2")
+	mutatorArgs, err := ds.UpdateRewardPartner(Partner, "param1", "param2")
 	if err != nil {
 		return err
 	}
@@ -388,13 +388,13 @@ func (obj *Reward) SetUnlockedHuawei(huawei string) {
 }
 
 func (obj *Reward) packPartialExtra(op octopus.OpCode) error {
+	if len(obj.Mutators.Extra.PartialFields) == 0 {
+		return nil
+	}
+
 	mutatorArgs, err := ds.UpdateRewardExtra(obj.fieldExtra, obj.Mutators.Extra.PartialFields)
 	if err != nil {
 		return err
-	}
-
-	if len(mutatorArgs) == 0 {
-		return nil
 	}
 
 	data := octopus.PackLua(obj.Mutators.Extra.OpFunc[op], append([]string{obj.PrimaryString()}, mutatorArgs...)...)
@@ -409,16 +409,16 @@ func (obj *Reward) packPartialExtra(op octopus.OpCode) error {
 }
 
 func (obj *Reward) packPartialUnlocked(op octopus.OpCode) error {
+	if len(obj.Mutators.Unlocked.PartialFields) == 0 {
+		return nil
+	}
+
 	mutatorArgs, err := ds.UpdateRewardUnlocked(obj.fieldUnlocked, obj.Mutators.Unlocked.PartialFields)
 	if err != nil {
 		return err
 	}
 
-	if len(mutatorArgs) == 0 {
-		return nil
-	}
-
-	data := octopus.PackLua(obj.Mutators.Extra.OpFunc[op], append([]string{obj.PrimaryString()}, mutatorArgs...)...)
+	data := octopus.PackLua(obj.Mutators.Unlocked.OpFunc[op], append([]string{obj.PrimaryString()}, mutatorArgs...)...)
 
 	logger := activerecord.Logger()
 
@@ -1315,23 +1315,25 @@ func (obj *Reward) insertReplace(ctx context.Context, insertMode octopus.InsertM
 		return err
 	}
 
-	mutatorArgs, err := ds.ReplaceRewardPartner(obj.fieldPartner)
-	if err != nil {
-		return err
-	}
+	if insertMode == octopus.InsertModeReplace {
+		mutatorArgs, err := ds.ReplaceRewardPartner(obj.fieldPartner)
+		if err != nil {
+			return err
+		}
 
-	data = octopus.PackLua("lua.replaceRewardPartner", append([]string{obj.PrimaryString()}, mutatorArgs...)...)
+		data = octopus.PackLua("lua.replaceRewardPartner", append([]string{obj.PrimaryString()}, mutatorArgs...)...)
 
-	resp, errCall := connection.Call(ctx, octopus.RequestTypeCall, data)
-	if errCall != nil {
-		metricErrCnt.Inc(ctx, "update_box", 1)
-		logger.Error(ctx, "Reward", obj.PrimaryString(), "Error update ia a box", errCall, connection.Info())
-		return errCall
-	}
+		resp, errCall := connection.Call(ctx, octopus.RequestTypeCall, data)
+		if errCall != nil {
+			metricErrCnt.Inc(ctx, "update_box", 1)
+			logger.Error(ctx, "Reward", obj.PrimaryString(), "Error update ia a box", errCall, connection.Info())
+			return errCall
+		}
 
-	_, err = octopus.ProcessResp(resp, 0)
-	if err != nil {
-		return errors.Wrap(err, "error unpack lua response")
+		_, err = octopus.ProcessResp(resp, 0)
+		if err != nil {
+			return errors.Wrap(err, "error unpack lua response")
+		}
 	}
 
 	obj.BaseField.Exists = true

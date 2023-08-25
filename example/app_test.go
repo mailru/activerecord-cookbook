@@ -101,25 +101,32 @@ func Test_main(t *testing.T) {
 		t.Errorf("Can't select reward: %s", err)
 	}
 
+	octopusMockServer.SetFixtures([]octopus.FixtureType{rewardByCodeMocker.EmptyByKeys(ctx, "64G_androi")})
+
 	ret, err := reward.SelectByCode(ctx, "64G_androi")
-	if err == nil {
+	if err != nil {
 		t.Errorf("select wrong reward. Returned: %+v, expected error", ret)
 	}
 
-	octopusMockServer.SetFixtures([]octopus.FixtureType{})
+	updateFxt, _ := fixture.GetUpdateRewardFixtureByCode(ctx, "64G_android", nil)
+	updateMutatorFxt := fixture.GetUpdateMutatorRewardFixtureByCode(ctx, "64G_android")
 
-	ret, err = reward.SelectByCode(ctx, "64G_android")
-	if err == nil {
-		t.Errorf("select reward after reset fixtures return: %+v, expected error", ret)
+	mockFxt := []octopus.FixtureType{
+		rewardByCodeMocker.ByFixtureCode(ctx, "64G_android"),
+		updateFxt,
 	}
 
-	err = rew.SetPartner("part")
+	mockFxt = append(mockFxt, updateMutatorFxt...)
+
+	octopusMockServer.SetFixtures(mockFxt)
+
+	err = rew.SetPartner("sobakamiloru")
 	if err != nil {
 		t.Errorf("can't set partner field: %s", err)
 	}
 
 	err = rew.Update(ctx)
-	if err == nil {
+	if err != nil {
 		t.Errorf("update reward unexpected error: %s", err)
 	}
 
@@ -127,6 +134,10 @@ func Test_main(t *testing.T) {
 	if err == nil {
 		t.Errorf("delete reward unexpected error: %s", err)
 	}
+
+	insertFxt, _ := fixture.GetInsertRewardFixtureByCode(ctx, "new_code", nil)
+
+	octopusMockServer.SetFixtures([]octopus.FixtureType{insertFxt})
 
 	description := "new description"
 	newRew := reward.New(ctx)
@@ -148,7 +159,7 @@ func Test_main(t *testing.T) {
 	}
 
 	err = newRew.Insert(ctx)
-	if err == nil {
+	if err != nil {
 		t.Errorf("update reward expected error: %s", err)
 	}
 }

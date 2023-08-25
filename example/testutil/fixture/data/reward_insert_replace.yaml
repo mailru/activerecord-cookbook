@@ -1,0 +1,8 @@
+- code: new_code
+  description: new description
+  extra:
+    title: ""
+    prepaid: false
+    other: { }
+  flags:
+    a: b

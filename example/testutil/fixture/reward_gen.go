@@ -133,6 +133,20 @@ func GetUpdateRewardFixtureByCode(ctx context.Context, Code string, trigger func
 	return octopus.CreateUpdateFixture(obj.MockUpdate(ctx), wrappedTrigger), promiseIsUsed
 }
 
+func GetUpdateMutatorRewardFixtureByCode(ctx context.Context, Code string) (fxts []octopus.FixtureType) {
+	obj := GetUpdateRewardByCode(Code)
+
+	for _, req := range obj.MockMutatorUpdate(ctx) {
+		ft, _ := octopus.CreateCallFixture(
+			func(wsubME []octopus.MockEntities) []byte {
+				return req
+			}, nil)
+		fxts = append(fxts, ft)
+	}
+
+	return fxts
+}
+
 func GetInsertRewardFixtureByCode(ctx context.Context, Code string, trigger func([]octopus.FixtureType) []octopus.FixtureType) (fx octopus.FixtureType, promiseIsUsed func() bool) {
 	obj := GetInsertReplaceRewardByCode(Code)
 
