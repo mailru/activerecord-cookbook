@@ -10,7 +10,7 @@ import (
 type FieldsReward struct {
 	Code        string `ar:"primary_key;size:"`
 	Services    string `ar:"serializer:Services;size:"`
-	Partner     string `ar:"selector:SelectByPartner;size:"`
+	Partner     string `ar:"selector:SelectByPartner;mutators:PartnerUpdate;size:"`
 	Extra       string `ar:"serializer:Extra;mutators:ExtraPartUpdate;size:"`
 	Flags       string `ar:"serializer:Flags;size:"`
 	Unlocked    string `ar:"serializer:Unlocked;mutators:UnlockedPartUpdate;size:"`
@@ -28,4 +28,5 @@ type SerializersReward struct {
 type MutatorsReward struct {
 	ExtraPartUpdate    *ds.Extra          `ar:"update:lua.updateExtra;pkg:github.com/mailru/activerecord-cookbook/example/ds;"`
 	UnlockedPartUpdate ds.ServiceUnlocked `ar:"update:lua.updateUnlocked;pkg:github.com/mailru/activerecord-cookbook/example/ds;"`
+	PartnerUpdate      string             `ar:"update:lua.updateRewardPartner,param1,param2;replace:lua.replaceRewardPartner;"`
 }

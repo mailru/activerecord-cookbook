@@ -289,6 +289,15 @@ func (obj *Reward) SetPartner(Partner string) error {
 	logger.Warn(context.TODO(), "Reward", obj.PrimaryString(), fmt.Sprintf("Size for field 'Partner' not set. Cur field size: %d. Object: 'Reward'", len(data)))
 
 	obj.BaseField.UpdateOps = append(obj.BaseField.UpdateOps, octopus.Ops{Field: 2, Op: octopus.OpSet, Value: data})
+
+	mutatorArgs, err := ds.UpdateRewardPartner(obj.fieldPartner, "param1", "param2")
+	if err != nil {
+		return err
+	}
+
+	data = octopus.PackLua("lua.updateRewardPartner", append([]string{obj.PrimaryString()}, mutatorArgs...)...)
+	obj.BaseField.UpdateOps = append(obj.BaseField.UpdateOps, octopus.Ops{Field: 2, Op: octopus.OpUpdate, Value: data})
+
 	obj.fieldPartner = Partner
 
 	return nil
@@ -379,7 +388,10 @@ func (obj *Reward) SetUnlockedHuawei(huawei string) {
 }
 
 func (obj *Reward) packPartialExtra(op octopus.OpCode) error {
-	mutatorArgs := ds.UpdateExtra(obj.fieldExtra, obj.Mutators.Extra.PartialFields)
+	mutatorArgs, err := ds.UpdateRewardExtra(obj.fieldExtra, obj.Mutators.Extra.PartialFields)
+	if err != nil {
+		return err
+	}
 
 	if len(mutatorArgs) == 0 {
 		return nil
@@ -397,7 +409,10 @@ func (obj *Reward) packPartialExtra(op octopus.OpCode) error {
 }
 
 func (obj *Reward) packPartialUnlocked(op octopus.OpCode) error {
-	mutatorArgs := ds.UpdateUnlocked(obj.fieldUnlocked, obj.Mutators.Unlocked.PartialFields)
+	mutatorArgs, err := ds.UpdateRewardUnlocked(obj.fieldUnlocked, obj.Mutators.Unlocked.PartialFields)
+	if err != nil {
+		return err
+	}
 
 	if len(mutatorArgs) == 0 {
 		return nil
@@ -1298,6 +1313,25 @@ func (obj *Reward) insertReplace(ctx context.Context, insertMode octopus.InsertM
 		logger.Error(ctx, "Reward", obj.PrimaryString(), "Error in response: ", err)
 
 		return err
+	}
+
+	mutatorArgs, err := ds.ReplaceRewardPartner(obj.fieldPartner)
+	if err != nil {
+		return err
+	}
+
+	data = octopus.PackLua("lua.replaceRewardPartner", append([]string{obj.PrimaryString()}, mutatorArgs...)...)
+
+	resp, errCall := connection.Call(ctx, octopus.RequestTypeCall, data)
+	if errCall != nil {
+		metricErrCnt.Inc(ctx, "update_box", 1)
+		logger.Error(ctx, "Reward", obj.PrimaryString(), "Error update ia a box", errCall, connection.Info())
+		return errCall
+	}
+
+	_, err = octopus.ProcessResp(resp, 0)
+	if err != nil {
+		return errors.Wrap(err, "error unpack lua response")
 	}
 
 	obj.BaseField.Exists = true
