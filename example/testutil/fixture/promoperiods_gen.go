@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
+// Generate info: argen@v1.8.7 (Commit: e17c811b)
 package fixture
 
 import (
@@ -123,6 +123,18 @@ func GetInsertReplacePromoperiodsByID(ID string) *promoperiods.Promoperiods {
 	activerecord.Logger().Debug(ctx, promoperiods.PromoperiodsList([]*promoperiods.Promoperiods{res}))
 
 	return res
+}
+
+func GetDeletePromoperiodsFixtureByPrimaryKey(ctx context.Context, pk string, trigger func(types []octopus.FixtureType) []octopus.FixtureType) (fx octopus.FixtureType, promiseIsUsed func() bool) {
+	obj := promoperiods.New(ctx)
+
+	if err := obj.SetID(pk); err != nil {
+		log.Fatalf("SetID error: %v", err)
+	}
+
+	wrappedTrigger, promiseIsUsed := octopus.WrapTriggerWithOnUsePromise(trigger)
+
+	return octopus.CreateDeleteFixture(obj.MockDelete(ctx), wrappedTrigger), promiseIsUsed
 }
 
 func GetUpdatePromoperiodsFixtureByID(ctx context.Context, ID string, trigger func(types []octopus.FixtureType) []octopus.FixtureType) (fx octopus.FixtureType, promiseIsUsed func() bool) {

@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
+// Generate info: argen@v1.8.7 (Commit: e17c811b)
 package fixture
 
 import (
@@ -122,6 +122,18 @@ func GetInsertReplaceArObjByID(ID int32) *arobj.ArObj {
 	activerecord.Logger().Debug(ctx, arobj.ArObjList([]*arobj.ArObj{res}))
 
 	return res
+}
+
+func GetDeleteArObjFixtureByPrimaryKey(ctx context.Context, pk int32, trigger func(types []octopus.FixtureType) []octopus.FixtureType) (fx octopus.FixtureType, promiseIsUsed func() bool) {
+	obj := arobj.New(ctx)
+
+	if err := obj.SetID(pk); err != nil {
+		log.Fatalf("SetID error: %v", err)
+	}
+
+	wrappedTrigger, promiseIsUsed := octopus.WrapTriggerWithOnUsePromise(trigger)
+
+	return octopus.CreateDeleteFixture(obj.MockDelete(ctx), wrappedTrigger), promiseIsUsed
 }
 
 func GetUpdateArObjFixtureByID(ctx context.Context, ID int32, trigger func(types []octopus.FixtureType) []octopus.FixtureType) (fx octopus.FixtureType, promiseIsUsed func() bool) {

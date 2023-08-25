@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
+// Generate info: argen@v1.8.7 (Commit: e17c811b)
 package fixture
 
 import (
@@ -122,6 +122,18 @@ func GetInsertReplaceBoolindexedByCode(Code string) *boolindexed.Boolindexed {
 	activerecord.Logger().Debug(ctx, boolindexed.BoolindexedList([]*boolindexed.Boolindexed{res}))
 
 	return res
+}
+
+func GetDeleteBoolindexedFixtureByPrimaryKey(ctx context.Context, pk string, trigger func(types []octopus.FixtureType) []octopus.FixtureType) (fx octopus.FixtureType, promiseIsUsed func() bool) {
+	obj := boolindexed.New(ctx)
+
+	if err := obj.SetCode(pk); err != nil {
+		log.Fatalf("SetCode error: %v", err)
+	}
+
+	wrappedTrigger, promiseIsUsed := octopus.WrapTriggerWithOnUsePromise(trigger)
+
+	return octopus.CreateDeleteFixture(obj.MockDelete(ctx), wrappedTrigger), promiseIsUsed
 }
 
 func GetUpdateBoolindexedFixtureByCode(ctx context.Context, Code string, trigger func(types []octopus.FixtureType) []octopus.FixtureType) (fx octopus.FixtureType, promiseIsUsed func() bool) {
