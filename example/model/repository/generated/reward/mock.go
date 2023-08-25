@@ -232,26 +232,6 @@ func (obj *Reward) RepoSelector(ctx context.Context) (any, error) {
 	return data, err
 }
 
-func (obj *Reward) MockMutatorUpdate(ctx context.Context) [][]byte {
-	log := activerecord.Logger()
-	ctx = log.SetLoggerValueToContext(ctx, map[string]interface{}{"MockMutatorUpdate": obj.BaseField.UpdateOps, "Repo": "Reward"})
-
-	updateMutatorOps := make([][]byte, 0, len(obj.BaseField.UpdateOps))
-
-	for _, update := range obj.BaseField.UpdateOps {
-		switch update.Op {
-		case octopus.OpUpdate:
-			updateMutatorOps = append(updateMutatorOps, update.Value)
-		default:
-			continue
-		}
-	}
-
-	log.Debug(ctx, fmt.Sprintf("Update packed tuple: '%X'\n", updateMutatorOps))
-
-	return updateMutatorOps
-}
-
 func (obj *Reward) MockUpdate(ctx context.Context) []byte {
 	log := activerecord.Logger()
 	ctx = log.SetLoggerValueToContext(ctx, map[string]interface{}{"MockUpdate": obj.BaseField.UpdateOps, "Repo": "Reward"})
@@ -264,18 +244,7 @@ func (obj *Reward) MockUpdate(ctx context.Context) []byte {
 		return nil
 	}
 
-	updateOps := make([]octopus.Ops, 0, len(obj.BaseField.UpdateOps))
-
-	for _, update := range obj.BaseField.UpdateOps {
-		switch update.Op {
-		case octopus.OpUpdate:
-			continue
-		default:
-			updateOps = append(updateOps, update)
-		}
-	}
-
-	w := octopus.PackUpdate(namespace, pk, updateOps)
+	w := octopus.PackUpdate(namespace, pk, obj.BaseField.UpdateOps)
 
 	log.Debug(ctx, fmt.Sprintf("Update packed tuple: '%X'\n", w))
 

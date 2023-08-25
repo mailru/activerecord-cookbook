@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.5.3-18-g3247b15 (Commit: 3247b15e)
+// Generate info: argen@v1.8.5-1-gaa389f8 (Commit: aa389f82)
 package fixture
 
 import (
@@ -125,26 +125,24 @@ func GetInsertReplaceRewardByCode(Code string) *reward.Reward {
 	return res
 }
 
+func GetDeleteRewardFixtureByPrimaryKey(ctx context.Context, pk string, trigger func(types []octopus.FixtureType) []octopus.FixtureType) (fx octopus.FixtureType, promiseIsUsed func() bool) {
+	obj := reward.New(ctx)
+
+	if err := obj.SetCode(pk); err != nil {
+		log.Fatalf("SetCode error: %v", err)
+	}
+
+	wrappedTrigger, promiseIsUsed := octopus.WrapTriggerWithOnUsePromise(trigger)
+
+	return octopus.CreateDeleteFixture(obj.MockDelete(ctx), wrappedTrigger), promiseIsUsed
+}
+
 func GetUpdateRewardFixtureByCode(ctx context.Context, Code string, trigger func(types []octopus.FixtureType) []octopus.FixtureType) (fx octopus.FixtureType, promiseIsUsed func() bool) {
 	obj := GetUpdateRewardByCode(Code)
 
 	wrappedTrigger, promiseIsUsed := octopus.WrapTriggerWithOnUsePromise(trigger)
 
 	return octopus.CreateUpdateFixture(obj.MockUpdate(ctx), wrappedTrigger), promiseIsUsed
-}
-
-func GetUpdateMutatorRewardFixtureByCode(ctx context.Context, Code string) (fxts []octopus.FixtureType) {
-	obj := GetUpdateRewardByCode(Code)
-
-	for _, req := range obj.MockMutatorUpdate(ctx) {
-		ft, _ := octopus.CreateCallFixture(
-			func(wsubME []octopus.MockEntities) []byte {
-				return req
-			}, nil)
-		fxts = append(fxts, ft)
-	}
-
-	return fxts
 }
 
 func GetInsertRewardFixtureByCode(ctx context.Context, Code string, trigger func([]octopus.FixtureType) []octopus.FixtureType) (fx octopus.FixtureType, promiseIsUsed func() bool) {

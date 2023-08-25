@@ -48,51 +48,6 @@ func (ns NSPackage) meta(n uint32) (SpaceMeta, bool) {
 }
 
 var NamespacePackages = NSPackage{
-	"25": {
-		PackageName: "boolindexed",
-		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
-			obj, err := boolindexed.TupleToStruct(ctx, tuple)
-			if err != nil {
-				return nil, fmt.Errorf("can't decode tuple: %s", err)
-			}
-
-			return boolindexed.MarshalFixtures([]*boolindexed.Boolindexed{obj})
-		},
-		Fields: []FieldMeta{
-
-			{
-				Name: "Code",
-				Unpacker: func(packedField []byte) (any, error) {
-
-					return boolindexed.UnpackCode(bytes.NewReader(packedField))
-				},
-			},
-
-			{
-				Name: "Invisible",
-				Unpacker: func(packedField []byte) (any, error) {
-
-					return boolindexed.UnpackInvisible(bytes.NewReader(packedField))
-				},
-			},
-		},
-		Indexes: map[string]IndexMeta{
-
-			"0.1": {
-				Name:     "Code",
-				Unpacker: func(packedKeys [][][]byte) (any, error) { return boolindexed.UnpackKeyIndexCode(packedKeys) },
-			},
-			"1.1": {
-				Name:     "Invisible",
-				Unpacker: func(packedKeys [][][]byte) (any, error) { return boolindexed.UnpackKeyIndexInvisible(packedKeys) },
-			},
-		},
-		PK: IndexMeta{
-
-			Name:     "Code",
-			Unpacker: func(packedKeys [][][]byte) (any, error) { return boolindexed.UnpackKeyIndexCode(packedKeys) },
-		},
-	},
 	"quantityOfCategories": {
 		PackageName: "category",
 		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
@@ -458,6 +413,51 @@ var NamespacePackages = NSPackage{
 
 			Name:     "ID",
 			Unpacker: func(packedKeys [][][]byte) (any, error) { return arobj.UnpackKeyIndexID(packedKeys) },
+		},
+	},
+	"25": {
+		PackageName: "boolindexed",
+		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
+			obj, err := boolindexed.TupleToStruct(ctx, tuple)
+			if err != nil {
+				return nil, fmt.Errorf("can't decode tuple: %s", err)
+			}
+
+			return boolindexed.MarshalFixtures([]*boolindexed.Boolindexed{obj})
+		},
+		Fields: []FieldMeta{
+
+			{
+				Name: "Code",
+				Unpacker: func(packedField []byte) (any, error) {
+
+					return boolindexed.UnpackCode(bytes.NewReader(packedField))
+				},
+			},
+
+			{
+				Name: "Invisible",
+				Unpacker: func(packedField []byte) (any, error) {
+
+					return boolindexed.UnpackInvisible(bytes.NewReader(packedField))
+				},
+			},
+		},
+		Indexes: map[string]IndexMeta{
+
+			"0.1": {
+				Name:     "Code",
+				Unpacker: func(packedKeys [][][]byte) (any, error) { return boolindexed.UnpackKeyIndexCode(packedKeys) },
+			},
+			"1.1": {
+				Name:     "Invisible",
+				Unpacker: func(packedKeys [][][]byte) (any, error) { return boolindexed.UnpackKeyIndexInvisible(packedKeys) },
+			},
+		},
+		PK: IndexMeta{
+
+			Name:     "Code",
+			Unpacker: func(packedKeys [][][]byte) (any, error) { return boolindexed.UnpackKeyIndexCode(packedKeys) },
 		},
 	},
 }

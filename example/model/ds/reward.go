@@ -1,15 +1,5 @@
 package ds
 
-import (
-	"encoding/json"
-	"fmt"
-	"hash/crc32"
-	"strconv"
-
-	"github.com/mailru/activerecord/pkg/serializer"
-	"github.com/mailru/activerecord/pkg/serializer/errs"
-)
-
 type Extra struct {
 	Title   string
 	Prepaid bool
@@ -39,46 +29,4 @@ type ServiceUnlocked struct {
 	IOS     string
 	Web     string
 	Huawei  string
-}
-
-func UpdateRewardExtra(extra *Extra, partialExtra map[string]any) ([]string, error) {
-	v, err := json.Marshal(extra)
-	if err != nil {
-		return nil, fmt.Errorf("%w: %v", errs.ErrMarshalJSON, err)
-	}
-
-	crc := strconv.Itoa(int(crc32.ChecksumIEEE(v)))
-
-	delete(partialExtra, "other")
-
-	extraValues, err := serializer.MapstructureMarshal(partialExtra)
-	if err != nil {
-		return nil, fmt.Errorf("%w: %v", errs.ErrMarshalJSON, err)
-	}
-
-	return []string{crc, extraValues}, nil
-}
-
-func UpdateRewardUnlocked(unlocked ServiceUnlocked, partialUnlocked map[string]any) ([]string, error) {
-	v, err := json.Marshal(unlocked)
-	if err != nil {
-		return nil, fmt.Errorf("%w: %v", errs.ErrMarshalJSON, err)
-	}
-
-	crc := strconv.Itoa(int(crc32.ChecksumIEEE(v)))
-
-	extraValues, err := serializer.MapstructureMarshal(partialUnlocked)
-	if err != nil {
-		return nil, fmt.Errorf("%w: %v", errs.ErrMarshalJSON, err)
-	}
-
-	return []string{crc, extraValues}, nil
-}
-
-func UpdateRewardPartner(partner string, param1 string, param2 string) ([]string, error) {
-	return []string{partner, param1, param2}, nil
-}
-
-func ReplaceRewardPartner(partner string) ([]string, error) {
-	return []string{partner}, nil
 }
