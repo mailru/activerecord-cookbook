@@ -98,7 +98,7 @@ test:
 
 .PHONY: generate
 generate:
-	$(GOPATH)/bin/argen --path './example/model/repository' --fixture_path "example/testutil"
+	$(GOPATH)/bin/argen --path './example/model/repository' --fixture_path "example/testutil/fixture"
 
 .PHONY: install
 install:
