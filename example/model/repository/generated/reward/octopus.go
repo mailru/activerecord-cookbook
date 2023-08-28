@@ -15,6 +15,7 @@ import (
 
 	"strings"
 
+	"github.com/mailru/activerecord-cookbook/example/model/conv"
 	"github.com/mailru/activerecord-cookbook/example/model/ds"
 	"github.com/mailru/activerecord/pkg/activerecord"
 	"github.com/mailru/activerecord/pkg/iproto/iproto"
@@ -290,12 +291,7 @@ func (obj *Reward) SetPartner(Partner string) error {
 
 	obj.BaseField.UpdateOps = append(obj.BaseField.UpdateOps, octopus.Ops{Field: 2, Op: octopus.OpSet, Value: data})
 
-	mutatorArgs, err := ds.UpdateRewardPartner(Partner, "param1", "param2")
-	if err != nil {
-		return err
-	}
-
-	data = octopus.PackLua("lua.updateRewardPartner", append([]string{obj.PrimaryString()}, mutatorArgs...)...)
+	data = octopus.PackLua("lua.updateRewardPartner", obj.PrimaryString(), Partner, "param1", "param2")
 	obj.BaseField.UpdateOps = append(obj.BaseField.UpdateOps, octopus.Ops{Field: 2, Op: octopus.OpUpdate, Value: data})
 
 	obj.fieldPartner = Partner
@@ -392,7 +388,7 @@ func (obj *Reward) packPartialExtra(op octopus.OpCode) error {
 		return nil
 	}
 
-	mutatorArgs, err := ds.UpdateRewardExtra(obj.fieldExtra, obj.Mutators.Extra.PartialFields)
+	mutatorArgs, err := conv.RewardExtraPartUpdate(obj.fieldExtra, obj.Mutators.Extra.PartialFields)
 	if err != nil {
 		return err
 	}
@@ -413,7 +409,7 @@ func (obj *Reward) packPartialUnlocked(op octopus.OpCode) error {
 		return nil
 	}
 
-	mutatorArgs, err := ds.UpdateRewardUnlocked(obj.fieldUnlocked, obj.Mutators.Unlocked.PartialFields)
+	mutatorArgs, err := conv.RewardUnlockedPartUpdate(obj.fieldUnlocked, obj.Mutators.Unlocked.PartialFields)
 	if err != nil {
 		return err
 	}
@@ -1316,12 +1312,7 @@ func (obj *Reward) insertReplace(ctx context.Context, insertMode octopus.InsertM
 	}
 
 	if insertMode == octopus.InsertModeReplace {
-		mutatorArgs, err := ds.ReplaceRewardPartner(obj.fieldPartner)
-		if err != nil {
-			return err
-		}
-
-		data = octopus.PackLua("lua.replaceRewardPartner", append([]string{obj.PrimaryString()}, mutatorArgs...)...)
+		data = octopus.PackLua("lua.replaceRewardPartner", obj.PrimaryString(), obj.fieldPartner)
 
 		resp, errCall := connection.Call(ctx, octopus.RequestTypeCall, data)
 		if errCall != nil {
