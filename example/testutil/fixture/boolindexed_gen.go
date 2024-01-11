@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.8.7 (Commit: e17c811b)
+// Generate info: argen@v1.11.0-b (Commit: 6934fae2)
 package fixture
 
 import (
@@ -20,21 +20,22 @@ import (
 )
 
 var boolindexedOnce sync.Once
-var boolindexedStore map[string]*boolindexed.Boolindexed
+var boolindexedStore map[string]int
+var boolindexedFixtures []*boolindexed.Boolindexed
 
 //go:embed data/boolindexed.yaml
 var boolindexedSource []byte
 
 func initBoolindexed() {
 	boolindexedOnce.Do(func() {
-		fixtures := boolindexed.UnmarshalFixtures(boolindexedSource)
+		boolindexedFixtures = boolindexed.UnmarshalFixtures(boolindexedSource)
 
-		boolindexedStore = map[string]*boolindexed.Boolindexed{}
-		for _, f := range fixtures {
+		boolindexedStore = map[string]int{}
+		for i, f := range boolindexedFixtures {
 			if _, ok := boolindexedStore[f.Primary()]; ok {
 				log.Fatalf("boolindexed  fixture with Code %v is duplicated", f.Primary())
 			}
-			boolindexedStore[f.Primary()] = f
+			boolindexedStore[f.Primary()] = i
 		}
 	})
 }
@@ -42,10 +43,12 @@ func initBoolindexed() {
 func GetBoolindexedByCode(Code string) *boolindexed.Boolindexed {
 	initBoolindexed()
 
-	res, ex := boolindexedStore[Code]
+	idx, ex := boolindexedStore[Code]
 	if !ex {
 		log.Fatalf("Boolindexed  fixture with Code %v not found", Code)
 	}
+
+	res := boolindexedFixtures[idx]
 
 	ctx := activerecord.Logger().SetLoggerValueToContext(context.Background(), map[string]interface{}{"GetBoolindexedByCode": Code, "FixtureStore": "boolindexedStore"})
 
@@ -55,21 +58,22 @@ func GetBoolindexedByCode(Code string) *boolindexed.Boolindexed {
 }
 
 var boolindexedUpdateOnce sync.Once
-var boolindexedUpdateStore map[string]*boolindexed.Boolindexed
+var boolindexedUpdateStore map[string]int
+var boolindexedUpdateFixtures []*boolindexed.Boolindexed
 
 //go:embed data/boolindexed_update.yaml
 var boolindexedUpdateSource []byte
 
 func initUpdateBoolindexed() {
 	boolindexedUpdateOnce.Do(func() {
-		fixtures := boolindexed.UnmarshalUpdateFixtures(boolindexedUpdateSource)
+		boolindexedUpdateFixtures = boolindexed.UnmarshalUpdateFixtures(boolindexedUpdateSource)
 
-		boolindexedUpdateStore = map[string]*boolindexed.Boolindexed{}
-		for _, f := range fixtures {
+		boolindexedUpdateStore = map[string]int{}
+		for i, f := range boolindexedUpdateFixtures {
 			if _, ok := boolindexedUpdateStore[f.Primary()]; ok {
 				log.Fatalf("boolindexed Update fixture with Code %v is duplicated", f.Primary())
 			}
-			boolindexedUpdateStore[f.Primary()] = f
+			boolindexedUpdateStore[f.Primary()] = i
 		}
 	})
 }
@@ -77,10 +81,12 @@ func initUpdateBoolindexed() {
 func GetUpdateBoolindexedByCode(Code string) *boolindexed.Boolindexed {
 	initUpdateBoolindexed()
 
-	res, ex := boolindexedUpdateStore[Code]
+	idx, ex := boolindexedUpdateStore[Code]
 	if !ex {
 		log.Fatalf("Boolindexed Update fixture with Code %v not found", Code)
 	}
+
+	res := boolindexedUpdateFixtures[idx]
 
 	ctx := activerecord.Logger().SetLoggerValueToContext(context.Background(), map[string]interface{}{"GetUpdateBoolindexedByCode": Code, "FixtureStore": "boolindexedUpdateStore"})
 
@@ -90,21 +96,22 @@ func GetUpdateBoolindexedByCode(Code string) *boolindexed.Boolindexed {
 }
 
 var boolindexedInsertReplaceOnce sync.Once
-var boolindexedInsertReplaceStore map[string]*boolindexed.Boolindexed
+var boolindexedInsertReplaceStore map[string]int
+var boolindexedInsertReplaceFixtures []*boolindexed.Boolindexed
 
 //go:embed data/boolindexed_insert_replace.yaml
 var boolindexedInsertReplaceSource []byte
 
 func initInsertReplaceBoolindexed() {
 	boolindexedInsertReplaceOnce.Do(func() {
-		fixtures := boolindexed.UnmarshalInsertReplaceFixtures(boolindexedInsertReplaceSource)
+		boolindexedInsertReplaceFixtures = boolindexed.UnmarshalInsertReplaceFixtures(boolindexedInsertReplaceSource)
 
-		boolindexedInsertReplaceStore = map[string]*boolindexed.Boolindexed{}
-		for _, f := range fixtures {
+		boolindexedInsertReplaceStore = map[string]int{}
+		for i, f := range boolindexedInsertReplaceFixtures {
 			if _, ok := boolindexedInsertReplaceStore[f.Primary()]; ok {
 				log.Fatalf("boolindexed InsertReplace fixture with Code %v is duplicated", f.Primary())
 			}
-			boolindexedInsertReplaceStore[f.Primary()] = f
+			boolindexedInsertReplaceStore[f.Primary()] = i
 		}
 	})
 }
@@ -112,10 +119,12 @@ func initInsertReplaceBoolindexed() {
 func GetInsertReplaceBoolindexedByCode(Code string) *boolindexed.Boolindexed {
 	initInsertReplaceBoolindexed()
 
-	res, ex := boolindexedInsertReplaceStore[Code]
+	idx, ex := boolindexedInsertReplaceStore[Code]
 	if !ex {
 		log.Fatalf("Boolindexed InsertReplace fixture with Code %v not found", Code)
 	}
+
+	res := boolindexedInsertReplaceFixtures[idx]
 
 	ctx := activerecord.Logger().SetLoggerValueToContext(context.Background(), map[string]interface{}{"GetInsertReplaceBoolindexedByCode": Code, "FixtureStore": "boolindexedInsertReplaceStore"})
 
@@ -142,6 +151,20 @@ func GetUpdateBoolindexedFixtureByCode(ctx context.Context, Code string, trigger
 	wrappedTrigger, promiseIsUsed := octopus.WrapTriggerWithOnUsePromise(trigger)
 
 	return octopus.CreateUpdateFixture(obj.MockUpdate(ctx), wrappedTrigger), promiseIsUsed
+}
+
+func BoolindexedStoreIterator() func(it func(any) error) error {
+	initBoolindexed()
+
+	return func(it func(e any) error) error {
+		for _, e := range boolindexedFixtures {
+			if err := it(e); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
 }
 
 func GetInsertBoolindexedFixtureByCode(ctx context.Context, Code string, trigger func([]octopus.FixtureType) []octopus.FixtureType) (fx octopus.FixtureType, promiseIsUsed func() bool) {

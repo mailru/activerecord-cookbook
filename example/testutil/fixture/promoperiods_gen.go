@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.8.7 (Commit: e17c811b)
+// Generate info: argen@v1.11.0-b (Commit: 6934fae2)
 package fixture
 
 import (
@@ -21,21 +21,22 @@ import (
 )
 
 var promoperiodsOnce sync.Once
-var promoperiodsStore map[string]*promoperiods.Promoperiods
+var promoperiodsStore map[string]int
+var promoperiodsFixtures []*promoperiods.Promoperiods
 
 //go:embed data/promoperiods.yaml
 var promoperiodsSource []byte
 
 func initPromoperiods() {
 	promoperiodsOnce.Do(func() {
-		fixtures := promoperiods.UnmarshalFixtures(promoperiodsSource)
+		promoperiodsFixtures = promoperiods.UnmarshalFixtures(promoperiodsSource)
 
-		promoperiodsStore = map[string]*promoperiods.Promoperiods{}
-		for _, f := range fixtures {
+		promoperiodsStore = map[string]int{}
+		for i, f := range promoperiodsFixtures {
 			if _, ok := promoperiodsStore[f.Primary()]; ok {
 				log.Fatalf("promoperiods  fixture with ID %v is duplicated", f.Primary())
 			}
-			promoperiodsStore[f.Primary()] = f
+			promoperiodsStore[f.Primary()] = i
 		}
 	})
 }
@@ -43,10 +44,12 @@ func initPromoperiods() {
 func GetPromoperiodsByID(ID string) *promoperiods.Promoperiods {
 	initPromoperiods()
 
-	res, ex := promoperiodsStore[ID]
+	idx, ex := promoperiodsStore[ID]
 	if !ex {
 		log.Fatalf("Promoperiods  fixture with ID %v not found", ID)
 	}
+
+	res := promoperiodsFixtures[idx]
 
 	ctx := activerecord.Logger().SetLoggerValueToContext(context.Background(), map[string]interface{}{"GetPromoperiodsByID": ID, "FixtureStore": "promoperiodsStore"})
 
@@ -56,21 +59,22 @@ func GetPromoperiodsByID(ID string) *promoperiods.Promoperiods {
 }
 
 var promoperiodsUpdateOnce sync.Once
-var promoperiodsUpdateStore map[string]*promoperiods.Promoperiods
+var promoperiodsUpdateStore map[string]int
+var promoperiodsUpdateFixtures []*promoperiods.Promoperiods
 
 //go:embed data/promoperiods_update.yaml
 var promoperiodsUpdateSource []byte
 
 func initUpdatePromoperiods() {
 	promoperiodsUpdateOnce.Do(func() {
-		fixtures := promoperiods.UnmarshalUpdateFixtures(promoperiodsUpdateSource)
+		promoperiodsUpdateFixtures = promoperiods.UnmarshalUpdateFixtures(promoperiodsUpdateSource)
 
-		promoperiodsUpdateStore = map[string]*promoperiods.Promoperiods{}
-		for _, f := range fixtures {
+		promoperiodsUpdateStore = map[string]int{}
+		for i, f := range promoperiodsUpdateFixtures {
 			if _, ok := promoperiodsUpdateStore[f.Primary()]; ok {
 				log.Fatalf("promoperiods Update fixture with ID %v is duplicated", f.Primary())
 			}
-			promoperiodsUpdateStore[f.Primary()] = f
+			promoperiodsUpdateStore[f.Primary()] = i
 		}
 	})
 }
@@ -78,10 +82,12 @@ func initUpdatePromoperiods() {
 func GetUpdatePromoperiodsByID(ID string) *promoperiods.Promoperiods {
 	initUpdatePromoperiods()
 
-	res, ex := promoperiodsUpdateStore[ID]
+	idx, ex := promoperiodsUpdateStore[ID]
 	if !ex {
 		log.Fatalf("Promoperiods Update fixture with ID %v not found", ID)
 	}
+
+	res := promoperiodsUpdateFixtures[idx]
 
 	ctx := activerecord.Logger().SetLoggerValueToContext(context.Background(), map[string]interface{}{"GetUpdatePromoperiodsByID": ID, "FixtureStore": "promoperiodsUpdateStore"})
 
@@ -91,21 +97,22 @@ func GetUpdatePromoperiodsByID(ID string) *promoperiods.Promoperiods {
 }
 
 var promoperiodsInsertReplaceOnce sync.Once
-var promoperiodsInsertReplaceStore map[string]*promoperiods.Promoperiods
+var promoperiodsInsertReplaceStore map[string]int
+var promoperiodsInsertReplaceFixtures []*promoperiods.Promoperiods
 
 //go:embed data/promoperiods_insert_replace.yaml
 var promoperiodsInsertReplaceSource []byte
 
 func initInsertReplacePromoperiods() {
 	promoperiodsInsertReplaceOnce.Do(func() {
-		fixtures := promoperiods.UnmarshalInsertReplaceFixtures(promoperiodsInsertReplaceSource)
+		promoperiodsInsertReplaceFixtures = promoperiods.UnmarshalInsertReplaceFixtures(promoperiodsInsertReplaceSource)
 
-		promoperiodsInsertReplaceStore = map[string]*promoperiods.Promoperiods{}
-		for _, f := range fixtures {
+		promoperiodsInsertReplaceStore = map[string]int{}
+		for i, f := range promoperiodsInsertReplaceFixtures {
 			if _, ok := promoperiodsInsertReplaceStore[f.Primary()]; ok {
 				log.Fatalf("promoperiods InsertReplace fixture with ID %v is duplicated", f.Primary())
 			}
-			promoperiodsInsertReplaceStore[f.Primary()] = f
+			promoperiodsInsertReplaceStore[f.Primary()] = i
 		}
 	})
 }
@@ -113,10 +120,12 @@ func initInsertReplacePromoperiods() {
 func GetInsertReplacePromoperiodsByID(ID string) *promoperiods.Promoperiods {
 	initInsertReplacePromoperiods()
 
-	res, ex := promoperiodsInsertReplaceStore[ID]
+	idx, ex := promoperiodsInsertReplaceStore[ID]
 	if !ex {
 		log.Fatalf("Promoperiods InsertReplace fixture with ID %v not found", ID)
 	}
+
+	res := promoperiodsInsertReplaceFixtures[idx]
 
 	ctx := activerecord.Logger().SetLoggerValueToContext(context.Background(), map[string]interface{}{"GetInsertReplacePromoperiodsByID": ID, "FixtureStore": "promoperiodsInsertReplaceStore"})
 
@@ -143,6 +152,20 @@ func GetUpdatePromoperiodsFixtureByID(ctx context.Context, ID string, trigger fu
 	wrappedTrigger, promiseIsUsed := octopus.WrapTriggerWithOnUsePromise(trigger)
 
 	return octopus.CreateUpdateFixture(obj.MockUpdate(ctx), wrappedTrigger), promiseIsUsed
+}
+
+func PromoperiodsStoreIterator() func(it func(any) error) error {
+	initPromoperiods()
+
+	return func(it func(e any) error) error {
+		for _, e := range promoperiodsFixtures {
+			if err := it(e); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
 }
 
 func GetInsertPromoperiodsFixtureByID(ctx context.Context, ID string, trigger func([]octopus.FixtureType) []octopus.FixtureType) (fx octopus.FixtureType, promiseIsUsed func() bool) {

@@ -3,7 +3,7 @@ module github.com/mailru/activerecord-cookbook
 go 1.19
 
 require (
-	github.com/mailru/activerecord v1.8.6
+	github.com/mailru/activerecord v1.11.0-b2
 	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools v2.2.0+incompatible
 )
@@ -18,6 +18,7 @@ require (
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324 // indirect
 )

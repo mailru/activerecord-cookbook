@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.8.7 (Commit: e17c811b)
+// Generate info: argen@v1.11.0-b (Commit: 6934fae2)
 package fixture
 
 import (
@@ -20,21 +20,22 @@ import (
 )
 
 var fooOnce sync.Once
-var fooStore map[string]*foo.Foo
+var fooStore map[string]int
+var fooFixtures []*foo.Foo
 
 //go:embed data/foo.yaml
 var fooSource []byte
 
 func initFoo() {
 	fooOnce.Do(func() {
-		fixtures := foo.UnmarshalFixtures(fooSource)
+		fooFixtures = foo.UnmarshalFixtures(fooSource)
 
-		fooStore = map[string]*foo.Foo{}
-		for _, f := range fixtures {
+		fooStore = map[string]int{}
+		for i, f := range fooFixtures {
 			if _, ok := fooStore[f.GetParams().PK()]; ok {
 				log.Fatalf("foo fixture with params %v are duplicated", f.GetParams())
 			}
-			fooStore[f.GetParams().PK()] = f
+			fooStore[f.GetParams().PK()] = i
 		}
 	})
 }
@@ -42,10 +43,12 @@ func initFoo() {
 func GetFooByParams(params foo.FooParams) *foo.Foo {
 	initFoo()
 
-	res, ex := fooStore[params.PK()]
+	idx, ex := fooStore[params.PK()]
 	if !ex {
 		log.Fatalf("Foo fixture with params %v not found", params)
 	}
+
+	res := fooFixtures[idx]
 
 	ctx := activerecord.Logger().SetLoggerValueToContext(context.Background(), map[string]interface{}{"GetFooByParams": params, "FixtureStore": "fooStore"})
 

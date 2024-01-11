@@ -4,11 +4,14 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.8.7 (Commit: e17c811b)
+// Generate info: argen@v1.11.0-b (Commit: 6934fae2)
 package arobj
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
 
 	"gopkg.in/yaml.v3"
@@ -26,11 +29,27 @@ func (objs ArObjList) String() string {
 }
 
 type ArObjFT struct {
-	ID        int32  `yaml:"id"`
-	Name      string `yaml:"name"`
-	AnotherID int32  `yaml:"another_id"`
-	Type      string `yaml:"type"`
-	Flags     uint32 `yaml:"flags"`
+	ID        int32  `yaml:"id" mapstructure:"id" json:"id"`
+	Name      string `yaml:"name" mapstructure:"name" json:"name"`
+	AnotherID int32  `yaml:"another_id" mapstructure:"another_id" json:"another_id"`
+	Type      string `yaml:"type" mapstructure:"type" json:"type"`
+	Flags     uint32 `yaml:"flags" mapstructure:"flags" json:"flags"`
+}
+
+func UnmarshalFixturesFromJSON(source []byte) ([]ArObjFT, error) {
+	source = bytes.TrimLeft(source, " \t\r\n")
+
+	if len(source) > 0 && source[0] == '{' {
+		source = []byte(fmt.Sprintf("[%s]", string(source)))
+	}
+
+	var v []ArObjFT
+
+	if err := json.Unmarshal([]byte(source), &v); err != nil {
+		return nil, err
+	}
+
+	return v, nil
 }
 
 func MarshalFixtures(objs []*ArObj) ([]byte, error) {

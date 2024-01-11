@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.8.7 (Commit: e17c811b)
+// Generate info: argen@v1.11.0-b (Commit: 6934fae2)
 package fixture
 
 import (
@@ -20,21 +20,22 @@ import (
 )
 
 var arobjOnce sync.Once
-var arobjStore map[int32]*arobj.ArObj
+var arobjStore map[int32]int
+var arobjFixtures []*arobj.ArObj
 
 //go:embed data/arobj.yaml
 var arobjSource []byte
 
 func initArObj() {
 	arobjOnce.Do(func() {
-		fixtures := arobj.UnmarshalFixtures(arobjSource)
+		arobjFixtures = arobj.UnmarshalFixtures(arobjSource)
 
-		arobjStore = map[int32]*arobj.ArObj{}
-		for _, f := range fixtures {
+		arobjStore = map[int32]int{}
+		for i, f := range arobjFixtures {
 			if _, ok := arobjStore[f.Primary()]; ok {
 				log.Fatalf("arobj  fixture with ID %v is duplicated", f.Primary())
 			}
-			arobjStore[f.Primary()] = f
+			arobjStore[f.Primary()] = i
 		}
 	})
 }
@@ -42,10 +43,12 @@ func initArObj() {
 func GetArObjByID(ID int32) *arobj.ArObj {
 	initArObj()
 
-	res, ex := arobjStore[ID]
+	idx, ex := arobjStore[ID]
 	if !ex {
 		log.Fatalf("ArObj  fixture with ID %v not found", ID)
 	}
+
+	res := arobjFixtures[idx]
 
 	ctx := activerecord.Logger().SetLoggerValueToContext(context.Background(), map[string]interface{}{"GetArObjByID": ID, "FixtureStore": "arobjStore"})
 
@@ -55,21 +58,22 @@ func GetArObjByID(ID int32) *arobj.ArObj {
 }
 
 var arobjUpdateOnce sync.Once
-var arobjUpdateStore map[int32]*arobj.ArObj
+var arobjUpdateStore map[int32]int
+var arobjUpdateFixtures []*arobj.ArObj
 
 //go:embed data/arobj_update.yaml
 var arobjUpdateSource []byte
 
 func initUpdateArObj() {
 	arobjUpdateOnce.Do(func() {
-		fixtures := arobj.UnmarshalUpdateFixtures(arobjUpdateSource)
+		arobjUpdateFixtures = arobj.UnmarshalUpdateFixtures(arobjUpdateSource)
 
-		arobjUpdateStore = map[int32]*arobj.ArObj{}
-		for _, f := range fixtures {
+		arobjUpdateStore = map[int32]int{}
+		for i, f := range arobjUpdateFixtures {
 			if _, ok := arobjUpdateStore[f.Primary()]; ok {
 				log.Fatalf("arobj Update fixture with ID %v is duplicated", f.Primary())
 			}
-			arobjUpdateStore[f.Primary()] = f
+			arobjUpdateStore[f.Primary()] = i
 		}
 	})
 }
@@ -77,10 +81,12 @@ func initUpdateArObj() {
 func GetUpdateArObjByID(ID int32) *arobj.ArObj {
 	initUpdateArObj()
 
-	res, ex := arobjUpdateStore[ID]
+	idx, ex := arobjUpdateStore[ID]
 	if !ex {
 		log.Fatalf("ArObj Update fixture with ID %v not found", ID)
 	}
+
+	res := arobjUpdateFixtures[idx]
 
 	ctx := activerecord.Logger().SetLoggerValueToContext(context.Background(), map[string]interface{}{"GetUpdateArObjByID": ID, "FixtureStore": "arobjUpdateStore"})
 
@@ -90,21 +96,22 @@ func GetUpdateArObjByID(ID int32) *arobj.ArObj {
 }
 
 var arobjInsertReplaceOnce sync.Once
-var arobjInsertReplaceStore map[int32]*arobj.ArObj
+var arobjInsertReplaceStore map[int32]int
+var arobjInsertReplaceFixtures []*arobj.ArObj
 
 //go:embed data/arobj_insert_replace.yaml
 var arobjInsertReplaceSource []byte
 
 func initInsertReplaceArObj() {
 	arobjInsertReplaceOnce.Do(func() {
-		fixtures := arobj.UnmarshalInsertReplaceFixtures(arobjInsertReplaceSource)
+		arobjInsertReplaceFixtures = arobj.UnmarshalInsertReplaceFixtures(arobjInsertReplaceSource)
 
-		arobjInsertReplaceStore = map[int32]*arobj.ArObj{}
-		for _, f := range fixtures {
+		arobjInsertReplaceStore = map[int32]int{}
+		for i, f := range arobjInsertReplaceFixtures {
 			if _, ok := arobjInsertReplaceStore[f.Primary()]; ok {
 				log.Fatalf("arobj InsertReplace fixture with ID %v is duplicated", f.Primary())
 			}
-			arobjInsertReplaceStore[f.Primary()] = f
+			arobjInsertReplaceStore[f.Primary()] = i
 		}
 	})
 }
@@ -112,10 +119,12 @@ func initInsertReplaceArObj() {
 func GetInsertReplaceArObjByID(ID int32) *arobj.ArObj {
 	initInsertReplaceArObj()
 
-	res, ex := arobjInsertReplaceStore[ID]
+	idx, ex := arobjInsertReplaceStore[ID]
 	if !ex {
 		log.Fatalf("ArObj InsertReplace fixture with ID %v not found", ID)
 	}
+
+	res := arobjInsertReplaceFixtures[idx]
 
 	ctx := activerecord.Logger().SetLoggerValueToContext(context.Background(), map[string]interface{}{"GetInsertReplaceArObjByID": ID, "FixtureStore": "arobjInsertReplaceStore"})
 
@@ -142,6 +151,20 @@ func GetUpdateArObjFixtureByID(ctx context.Context, ID int32, trigger func(types
 	wrappedTrigger, promiseIsUsed := octopus.WrapTriggerWithOnUsePromise(trigger)
 
 	return octopus.CreateUpdateFixture(obj.MockUpdate(ctx), wrappedTrigger), promiseIsUsed
+}
+
+func ArObjStoreIterator() func(it func(any) error) error {
+	initArObj()
+
+	return func(it func(e any) error) error {
+		for _, e := range arobjFixtures {
+			if err := it(e); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
 }
 
 func GetInsertArObjFixtureByID(ctx context.Context, ID int32, trigger func([]octopus.FixtureType) []octopus.FixtureType) (fx octopus.FixtureType, promiseIsUsed func() bool) {

@@ -109,13 +109,14 @@ func Test_main(t *testing.T) {
 	}
 
 	updateFxt, _ := fixture.GetUpdateRewardFixtureByCode(ctx, "64G_android", nil)
+	updateMutatorFxt := fixture.GetUpdateMutatorPartnerFixtureByCode(ctx, "64G_android")
 
 	mockFxt := []octopus.FixtureType{
 		rewardByCodeMocker.ByFixtureCode(ctx, "64G_android"),
 		updateFxt,
 	}
 
-	mockFxt = append(mockFxt)
+	mockFxt = append(mockFxt, updateMutatorFxt)
 
 	octopusMockServer.SetFixtures(mockFxt)
 

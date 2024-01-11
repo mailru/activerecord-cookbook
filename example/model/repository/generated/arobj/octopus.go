@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.8.7 (Commit: e17c811b)
+// Generate info: argen@v1.11.0-b (Commit: 6934fae2)
 package arobj
 
 import (
@@ -239,6 +239,7 @@ func (obj *ArObj) SetAnotherID(AnotherID int32) error {
 	}
 
 	obj.BaseField.UpdateOps = append(obj.BaseField.UpdateOps, octopus.Ops{Field: 2, Op: octopus.OpSet, Value: data})
+
 	obj.fieldAnotherID = AnotherID
 
 	return nil
@@ -353,6 +354,7 @@ func (obj *ArObj) SetFlags(Flags uint32) error {
 	}
 
 	obj.BaseField.UpdateOps = append(obj.BaseField.UpdateOps, octopus.Ops{Field: 4, Op: octopus.OpSet, Value: data})
+
 	obj.fieldFlags = Flags
 
 	return nil
@@ -443,8 +445,8 @@ func selectBox(ctx context.Context, indexnum uint32, keysPacked [][][]byte, limi
 		logger.Warn(ctx, "Select limit reached. Result may less than db records.")
 	}
 
-	mode, ok := connection.InstanceMode().(octopus.ServerModeType)
-	if !ok || activerecord.ServerModeType(mode) == activerecord.ModeReplica {
+	mode, ok := connection.InstanceMode().(activerecord.ServerModeType)
+	if !ok || mode == activerecord.ModeReplica {
 		if !ok {
 			logger.Error(ctx, "Invalid server mode type: %T", connection.InstanceMode())
 		}
@@ -970,6 +972,13 @@ func (obj *ArObj) Update(ctx context.Context) error {
 		return obj.Replace(ctx)
 	}
 
+	connection, err := octopus.Box(ctx, 0, activerecord.MasterInstanceType, "arcfg", nil)
+	if err != nil {
+		metricErrCnt.Inc(ctx, "update_preparebox", 1)
+		logger.Error(ctx, "ArObj", obj.PrimaryString(), fmt.Sprintf("Error get box '%s'", err))
+		return err
+	}
+
 	if len(obj.BaseField.UpdateOps) == 0 {
 		metricStatCnt.Inc(ctx, "update_empty", 1)
 		logger.Debug(ctx, "", obj.PrimaryString(), "Empty update")
@@ -986,13 +995,6 @@ func (obj *ArObj) Update(ctx context.Context) error {
 	w := octopus.PackUpdate(namespace, pk, obj.BaseField.UpdateOps)
 
 	log.Printf("Update packed tuple: '%X'\n", w)
-
-	connection, err := octopus.Box(ctx, 0, activerecord.MasterInstanceType, "arcfg", nil)
-	if err != nil {
-		metricErrCnt.Inc(ctx, "update_preparebox", 1)
-		logger.Error(ctx, "ArObj", obj.PrimaryString(), fmt.Sprintf("Error get box '%s'", err))
-		return err
-	}
 
 	respBytes, errCall := connection.Call(ctx, octopus.RequestTypeUpdate, w)
 	if errCall != nil {

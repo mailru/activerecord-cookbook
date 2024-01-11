@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.8.7 (Commit: e17c811b)
+// Generate info: argen@v1.11.0-b (Commit: 6934fae2)
 package reward
 
 import (
@@ -230,6 +230,66 @@ func (obj *Reward) RepoSelector(ctx context.Context) (any, error) {
 		return nil, fmt.Errorf("select Reward with pk %v: %w", obj.Primary(), activerecord.ErrNoData)
 	}
 	return data, err
+}
+
+func (obj *Reward) MockMutatorPartnerUpdate(ctx context.Context) [][]byte {
+	log := activerecord.Logger()
+	ctx = log.SetLoggerValueToContext(ctx, map[string]interface{}{"MockMutatorPartnerUpdate": obj.Mutators.Partner.UpdateOps, "Repo": "Reward"})
+
+	updateMutatorOps := make([][]byte, 0, len(obj.Mutators.Partner.UpdateOps))
+
+	for _, update := range obj.Mutators.Partner.UpdateOps {
+		switch update.Op {
+		case octopus.OpUpdate:
+			updateMutatorOps = append(updateMutatorOps, update.Value)
+		default:
+			continue
+		}
+	}
+
+	log.Debug(ctx, fmt.Sprintf("Update mutator packed tuple: '%X'\n", updateMutatorOps))
+
+	return updateMutatorOps
+}
+
+func (obj *Reward) MockMutatorExtraPartUpdate(ctx context.Context) [][]byte {
+	log := activerecord.Logger()
+	ctx = log.SetLoggerValueToContext(ctx, map[string]interface{}{"MockMutatorExtraPartUpdate": obj.Mutators.ExtraPart.UpdateOps, "Repo": "Reward"})
+
+	updateMutatorOps := make([][]byte, 0, len(obj.Mutators.ExtraPart.UpdateOps))
+
+	for _, update := range obj.Mutators.ExtraPart.UpdateOps {
+		switch update.Op {
+		case octopus.OpUpdate:
+			updateMutatorOps = append(updateMutatorOps, update.Value)
+		default:
+			continue
+		}
+	}
+
+	log.Debug(ctx, fmt.Sprintf("Update mutator packed tuple: '%X'\n", updateMutatorOps))
+
+	return updateMutatorOps
+}
+
+func (obj *Reward) MockMutatorUnlockedPartUpdate(ctx context.Context) [][]byte {
+	log := activerecord.Logger()
+	ctx = log.SetLoggerValueToContext(ctx, map[string]interface{}{"MockMutatorUnlockedPartUpdate": obj.Mutators.UnlockedPart.UpdateOps, "Repo": "Reward"})
+
+	updateMutatorOps := make([][]byte, 0, len(obj.Mutators.UnlockedPart.UpdateOps))
+
+	for _, update := range obj.Mutators.UnlockedPart.UpdateOps {
+		switch update.Op {
+		case octopus.OpUpdate:
+			updateMutatorOps = append(updateMutatorOps, update.Value)
+		default:
+			continue
+		}
+	}
+
+	log.Debug(ctx, fmt.Sprintf("Update mutator packed tuple: '%X'\n", updateMutatorOps))
+
+	return updateMutatorOps
 }
 
 func (obj *Reward) MockUpdate(ctx context.Context) []byte {
