@@ -4,11 +4,14 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.8.7 (Commit: e17c811b)
+// Generate info: argen@v1.11.0-b (Commit: 6934fae2)
 package boolindexed
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
 
 	"gopkg.in/yaml.v3"
@@ -26,8 +29,24 @@ func (objs BoolindexedList) String() string {
 }
 
 type BoolindexedFT struct {
-	Code      string `yaml:"code"`
-	Invisible bool   `yaml:"invisible"`
+	Code      string `yaml:"code" mapstructure:"code" json:"code"`
+	Invisible bool   `yaml:"invisible" mapstructure:"invisible" json:"invisible"`
+}
+
+func UnmarshalFixturesFromJSON(source []byte) ([]BoolindexedFT, error) {
+	source = bytes.TrimLeft(source, " \t\r\n")
+
+	if len(source) > 0 && source[0] == '{' {
+		source = []byte(fmt.Sprintf("[%s]", string(source)))
+	}
+
+	var v []BoolindexedFT
+
+	if err := json.Unmarshal([]byte(source), &v); err != nil {
+		return nil, err
+	}
+
+	return v, nil
 }
 
 func MarshalFixtures(objs []*Boolindexed) ([]byte, error) {

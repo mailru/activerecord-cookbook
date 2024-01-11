@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.8.7 (Commit: e17c811b)
+// Generate info: argen@v1.11.0-b (Commit: 6934fae2)
 package fixture
 
 import (
@@ -21,21 +21,22 @@ import (
 )
 
 var rewardOnce sync.Once
-var rewardStore map[string]*reward.Reward
+var rewardStore map[string]int
+var rewardFixtures []*reward.Reward
 
 //go:embed data/reward.yaml
 var rewardSource []byte
 
 func initReward() {
 	rewardOnce.Do(func() {
-		fixtures := reward.UnmarshalFixtures(rewardSource)
+		rewardFixtures = reward.UnmarshalFixtures(rewardSource)
 
-		rewardStore = map[string]*reward.Reward{}
-		for _, f := range fixtures {
+		rewardStore = map[string]int{}
+		for i, f := range rewardFixtures {
 			if _, ok := rewardStore[f.Primary()]; ok {
 				log.Fatalf("reward  fixture with Code %v is duplicated", f.Primary())
 			}
-			rewardStore[f.Primary()] = f
+			rewardStore[f.Primary()] = i
 		}
 	})
 }
@@ -43,10 +44,12 @@ func initReward() {
 func GetRewardByCode(Code string) *reward.Reward {
 	initReward()
 
-	res, ex := rewardStore[Code]
+	idx, ex := rewardStore[Code]
 	if !ex {
 		log.Fatalf("Reward  fixture with Code %v not found", Code)
 	}
+
+	res := rewardFixtures[idx]
 
 	ctx := activerecord.Logger().SetLoggerValueToContext(context.Background(), map[string]interface{}{"GetRewardByCode": Code, "FixtureStore": "rewardStore"})
 
@@ -56,21 +59,22 @@ func GetRewardByCode(Code string) *reward.Reward {
 }
 
 var rewardUpdateOnce sync.Once
-var rewardUpdateStore map[string]*reward.Reward
+var rewardUpdateStore map[string]int
+var rewardUpdateFixtures []*reward.Reward
 
 //go:embed data/reward_update.yaml
 var rewardUpdateSource []byte
 
 func initUpdateReward() {
 	rewardUpdateOnce.Do(func() {
-		fixtures := reward.UnmarshalUpdateFixtures(rewardUpdateSource)
+		rewardUpdateFixtures = reward.UnmarshalUpdateFixtures(rewardUpdateSource)
 
-		rewardUpdateStore = map[string]*reward.Reward{}
-		for _, f := range fixtures {
+		rewardUpdateStore = map[string]int{}
+		for i, f := range rewardUpdateFixtures {
 			if _, ok := rewardUpdateStore[f.Primary()]; ok {
 				log.Fatalf("reward Update fixture with Code %v is duplicated", f.Primary())
 			}
-			rewardUpdateStore[f.Primary()] = f
+			rewardUpdateStore[f.Primary()] = i
 		}
 	})
 }
@@ -78,10 +82,12 @@ func initUpdateReward() {
 func GetUpdateRewardByCode(Code string) *reward.Reward {
 	initUpdateReward()
 
-	res, ex := rewardUpdateStore[Code]
+	idx, ex := rewardUpdateStore[Code]
 	if !ex {
 		log.Fatalf("Reward Update fixture with Code %v not found", Code)
 	}
+
+	res := rewardUpdateFixtures[idx]
 
 	ctx := activerecord.Logger().SetLoggerValueToContext(context.Background(), map[string]interface{}{"GetUpdateRewardByCode": Code, "FixtureStore": "rewardUpdateStore"})
 
@@ -91,21 +97,22 @@ func GetUpdateRewardByCode(Code string) *reward.Reward {
 }
 
 var rewardInsertReplaceOnce sync.Once
-var rewardInsertReplaceStore map[string]*reward.Reward
+var rewardInsertReplaceStore map[string]int
+var rewardInsertReplaceFixtures []*reward.Reward
 
 //go:embed data/reward_insert_replace.yaml
 var rewardInsertReplaceSource []byte
 
 func initInsertReplaceReward() {
 	rewardInsertReplaceOnce.Do(func() {
-		fixtures := reward.UnmarshalInsertReplaceFixtures(rewardInsertReplaceSource)
+		rewardInsertReplaceFixtures = reward.UnmarshalInsertReplaceFixtures(rewardInsertReplaceSource)
 
-		rewardInsertReplaceStore = map[string]*reward.Reward{}
-		for _, f := range fixtures {
+		rewardInsertReplaceStore = map[string]int{}
+		for i, f := range rewardInsertReplaceFixtures {
 			if _, ok := rewardInsertReplaceStore[f.Primary()]; ok {
 				log.Fatalf("reward InsertReplace fixture with Code %v is duplicated", f.Primary())
 			}
-			rewardInsertReplaceStore[f.Primary()] = f
+			rewardInsertReplaceStore[f.Primary()] = i
 		}
 	})
 }
@@ -113,10 +120,12 @@ func initInsertReplaceReward() {
 func GetInsertReplaceRewardByCode(Code string) *reward.Reward {
 	initInsertReplaceReward()
 
-	res, ex := rewardInsertReplaceStore[Code]
+	idx, ex := rewardInsertReplaceStore[Code]
 	if !ex {
 		log.Fatalf("Reward InsertReplace fixture with Code %v not found", Code)
 	}
+
+	res := rewardInsertReplaceFixtures[idx]
 
 	ctx := activerecord.Logger().SetLoggerValueToContext(context.Background(), map[string]interface{}{"GetInsertReplaceRewardByCode": Code, "FixtureStore": "rewardInsertReplaceStore"})
 
@@ -145,18 +154,69 @@ func GetUpdateRewardFixtureByCode(ctx context.Context, Code string, trigger func
 	return octopus.CreateUpdateFixture(obj.MockUpdate(ctx), wrappedTrigger), promiseIsUsed
 }
 
-func GetUpdateMutatorRewardFixtureByCode(ctx context.Context, Code string) (fxts []octopus.FixtureType) {
+func RewardStoreIterator() func(it func(any) error) error {
+	initReward()
+
+	return func(it func(e any) error) error {
+		for _, e := range rewardFixtures {
+			if err := it(e); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+}
+
+// Нужно доработать, т.к. пока из файла репозитория фикстур update.yaml нельзя выборочно устанавливать значения частично обновляемого поля
+// Все неустановленные поля будут проинициализированы дефолтными значениями
+func GetUpdateMutatorPartnerFixtureByCode(ctx context.Context, Code string) (fxt octopus.FixtureType) {
 	obj := GetUpdateRewardByCode(Code)
 
-	for _, req := range obj.MockMutatorUpdate(ctx) {
+	for _, req := range obj.MockMutatorPartnerUpdate(ctx) {
 		ft, _ := octopus.CreateCallFixture(
 			func(wsubME []octopus.MockEntities) []byte {
 				return req
 			}, nil)
-		fxts = append(fxts, ft)
+		// available only one
+		return ft
 	}
 
-	return fxts
+	return
+}
+
+// Нужно доработать, т.к. пока из файла репозитория фикстур update.yaml нельзя выборочно устанавливать значения частично обновляемого поля
+// Все неустановленные поля будут проинициализированы дефолтными значениями
+func GetUpdateMutatorExtraPartFixtureByCode(ctx context.Context, Code string) (fxt octopus.FixtureType) {
+	obj := GetUpdateRewardByCode(Code)
+
+	for _, req := range obj.MockMutatorExtraPartUpdate(ctx) {
+		ft, _ := octopus.CreateCallFixture(
+			func(wsubME []octopus.MockEntities) []byte {
+				return req
+			}, nil)
+		// available only one
+		return ft
+	}
+
+	return
+}
+
+// Нужно доработать, т.к. пока из файла репозитория фикстур update.yaml нельзя выборочно устанавливать значения частично обновляемого поля
+// Все неустановленные поля будут проинициализированы дефолтными значениями
+func GetUpdateMutatorUnlockedPartFixtureByCode(ctx context.Context, Code string) (fxt octopus.FixtureType) {
+	obj := GetUpdateRewardByCode(Code)
+
+	for _, req := range obj.MockMutatorUnlockedPartUpdate(ctx) {
+		ft, _ := octopus.CreateCallFixture(
+			func(wsubME []octopus.MockEntities) []byte {
+				return req
+			}, nil)
+		// available only one
+		return ft
+	}
+
+	return
 }
 
 func GetInsertRewardFixtureByCode(ctx context.Context, Code string, trigger func([]octopus.FixtureType) []octopus.FixtureType) (fx octopus.FixtureType, promiseIsUsed func() bool) {

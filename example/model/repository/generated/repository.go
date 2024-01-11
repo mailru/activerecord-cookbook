@@ -4,7 +4,7 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.8.7 (Commit: e17c811b)
+// Generate info: argen@v1.11.0-b (Commit: 6934fae2)
 package repository
 
 import (
@@ -23,11 +23,12 @@ import (
 )
 
 type SpaceMeta struct {
-	PackageName string
-	Unpacker    func(ctx context.Context, tuple octopus.TupleData) (any, error)
-	Fields      []FieldMeta
-	PK          IndexMeta
-	Indexes     map[string]IndexMeta
+	PackageName     string
+	Unpacker        func(ctx context.Context, tuple octopus.TupleData) (any, error)
+	FixtureUnpacker func(ctx context.Context, source []byte) ([]any, error)
+	Fields          []FieldMeta
+	PK              IndexMeta
+	Indexes         map[string]IndexMeta
 }
 
 type IndexMeta struct {
@@ -48,6 +49,123 @@ func (ns NSPackage) meta(n uint32) (SpaceMeta, bool) {
 }
 
 var NamespacePackages = NSPackage{
+	"24": {
+		PackageName: "reward",
+		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
+			obj, err := reward.TupleToStruct(ctx, tuple)
+			if err != nil {
+				return nil, fmt.Errorf("can't decode tuple: %s", err)
+			}
+
+			return reward.MarshalFixtures([]*reward.Reward{obj})
+		},
+		FixtureUnpacker: func(ctx context.Context, source []byte) (res []any, err error) {
+			fxts, err := reward.UnmarshalFixturesFromJSON(source)
+			if err != nil {
+				return nil, fmt.Errorf("can't decode tuple: %s", err)
+			}
+
+			for _, v := range fxts {
+				res = append(res, v)
+			}
+
+			return
+		},
+		Fields: []FieldMeta{
+
+			{
+				Name: "Code",
+				Unpacker: func(packedField []byte) (any, error) {
+
+					return reward.UnpackCode(bytes.NewReader(packedField))
+				},
+			},
+
+			{
+				Name: "Services",
+				Unpacker: func(packedField []byte) (any, error) {
+					field, err := reward.UnpackServices(bytes.NewReader(packedField))
+					if err != nil {
+						return nil, err
+					}
+
+					return reward.MarshalServices(field)
+				},
+			},
+
+			{
+				Name: "Partner",
+				Unpacker: func(packedField []byte) (any, error) {
+
+					return reward.UnpackPartner(bytes.NewReader(packedField))
+				},
+			},
+
+			{
+				Name: "Extra",
+				Unpacker: func(packedField []byte) (any, error) {
+					field, err := reward.UnpackExtra(bytes.NewReader(packedField))
+					if err != nil {
+						return nil, err
+					}
+
+					return reward.MarshalExtra(field)
+				},
+			},
+
+			{
+				Name: "Flags",
+				Unpacker: func(packedField []byte) (any, error) {
+					field, err := reward.UnpackFlags(bytes.NewReader(packedField))
+					if err != nil {
+						return nil, err
+					}
+
+					return reward.MarshalFlags(field)
+				},
+			},
+
+			{
+				Name: "Unlocked",
+				Unpacker: func(packedField []byte) (any, error) {
+					field, err := reward.UnpackUnlocked(bytes.NewReader(packedField))
+					if err != nil {
+						return nil, err
+					}
+
+					return reward.MarshalUnlocked(field)
+				},
+			},
+
+			{
+				Name: "Description",
+				Unpacker: func(packedField []byte) (any, error) {
+					field, err := reward.UnpackDescription(bytes.NewReader(packedField))
+					if err != nil {
+						return nil, err
+					}
+
+					return reward.MarshalDescription(field)
+				},
+			},
+		},
+		Indexes: map[string]IndexMeta{
+
+			"0.1": {
+				Name:     "Code",
+				Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexCode(packedKeys) },
+			},
+			"1.1": {
+				Name:     "Partner",
+				Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexPartner(packedKeys) },
+			},
+		},
+		PK: IndexMeta{
+
+			Name:     "Code",
+			Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexCode(packedKeys) },
+		},
+	},
 	"5": {
 		PackageName: "arobj",
 		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
@@ -57,6 +175,18 @@ var NamespacePackages = NSPackage{
 			}
 
 			return arobj.MarshalFixtures([]*arobj.ArObj{obj})
+		},
+		FixtureUnpacker: func(ctx context.Context, source []byte) (res []any, err error) {
+			fxts, err := arobj.UnmarshalFixturesFromJSON(source)
+			if err != nil {
+				return nil, fmt.Errorf("can't decode tuple: %s", err)
+			}
+
+			for _, v := range fxts {
+				res = append(res, v)
+			}
+
+			return
 		},
 		Fields: []FieldMeta{
 
@@ -135,6 +265,18 @@ var NamespacePackages = NSPackage{
 
 			return boolindexed.MarshalFixtures([]*boolindexed.Boolindexed{obj})
 		},
+		FixtureUnpacker: func(ctx context.Context, source []byte) (res []any, err error) {
+			fxts, err := boolindexed.UnmarshalFixturesFromJSON(source)
+			if err != nil {
+				return nil, fmt.Errorf("can't decode tuple: %s", err)
+			}
+
+			for _, v := range fxts {
+				res = append(res, v)
+			}
+
+			return
+		},
 		Fields: []FieldMeta{
 
 			{
@@ -180,6 +322,18 @@ var NamespacePackages = NSPackage{
 
 			return category.MarshalFixtures([]*category.Category{obj})
 		},
+		FixtureUnpacker: func(ctx context.Context, source []byte) (res []any, err error) {
+			fxts, err := category.UnmarshalFixturesFromJSON(source)
+			if err != nil {
+				return nil, fmt.Errorf("can't decode tuple: %s", err)
+			}
+
+			for _, v := range fxts {
+				res = append(res, v)
+			}
+
+			return
+		},
 		Fields:  []FieldMeta{},
 		Indexes: map[string]IndexMeta{},
 		PK:      IndexMeta{},
@@ -194,6 +348,18 @@ var NamespacePackages = NSPackage{
 
 			return foo.MarshalFixtures([]*foo.Foo{obj})
 		},
+		FixtureUnpacker: func(ctx context.Context, source []byte) (res []any, err error) {
+			fxts, err := foo.UnmarshalFixturesFromJSON(source)
+			if err != nil {
+				return nil, fmt.Errorf("can't decode tuple: %s", err)
+			}
+
+			for _, v := range fxts {
+				res = append(res, v)
+			}
+
+			return
+		},
 		Fields:  []FieldMeta{},
 		Indexes: map[string]IndexMeta{},
 		PK:      IndexMeta{},
@@ -207,6 +373,18 @@ var NamespacePackages = NSPackage{
 			}
 
 			return promoperiods.MarshalFixtures([]*promoperiods.Promoperiods{obj})
+		},
+		FixtureUnpacker: func(ctx context.Context, source []byte) (res []any, err error) {
+			fxts, err := promoperiods.UnmarshalFixturesFromJSON(source)
+			if err != nil {
+				return nil, fmt.Errorf("can't decode tuple: %s", err)
+			}
+
+			for _, v := range fxts {
+				res = append(res, v)
+			}
+
+			return
 		},
 		Fields: []FieldMeta{
 
@@ -353,111 +531,6 @@ var NamespacePackages = NSPackage{
 
 			Name:     "ID",
 			Unpacker: func(packedKeys [][][]byte) (any, error) { return promoperiods.UnpackKeyIndexID(packedKeys) },
-		},
-	},
-	"24": {
-		PackageName: "reward",
-		Unpacker: func(ctx context.Context, tuple octopus.TupleData) (any, error) {
-			obj, err := reward.TupleToStruct(ctx, tuple)
-			if err != nil {
-				return nil, fmt.Errorf("can't decode tuple: %s", err)
-			}
-
-			return reward.MarshalFixtures([]*reward.Reward{obj})
-		},
-		Fields: []FieldMeta{
-
-			{
-				Name: "Code",
-				Unpacker: func(packedField []byte) (any, error) {
-
-					return reward.UnpackCode(bytes.NewReader(packedField))
-				},
-			},
-
-			{
-				Name: "Services",
-				Unpacker: func(packedField []byte) (any, error) {
-					field, err := reward.UnpackServices(bytes.NewReader(packedField))
-					if err != nil {
-						return nil, err
-					}
-
-					return reward.MarshalServices(field)
-				},
-			},
-
-			{
-				Name: "Partner",
-				Unpacker: func(packedField []byte) (any, error) {
-
-					return reward.UnpackPartner(bytes.NewReader(packedField))
-				},
-			},
-
-			{
-				Name: "Extra",
-				Unpacker: func(packedField []byte) (any, error) {
-					field, err := reward.UnpackExtra(bytes.NewReader(packedField))
-					if err != nil {
-						return nil, err
-					}
-
-					return reward.MarshalExtra(field)
-				},
-			},
-
-			{
-				Name: "Flags",
-				Unpacker: func(packedField []byte) (any, error) {
-					field, err := reward.UnpackFlags(bytes.NewReader(packedField))
-					if err != nil {
-						return nil, err
-					}
-
-					return reward.MarshalFlags(field)
-				},
-			},
-
-			{
-				Name: "Unlocked",
-				Unpacker: func(packedField []byte) (any, error) {
-					field, err := reward.UnpackUnlocked(bytes.NewReader(packedField))
-					if err != nil {
-						return nil, err
-					}
-
-					return reward.MarshalUnlocked(field)
-				},
-			},
-
-			{
-				Name: "Description",
-				Unpacker: func(packedField []byte) (any, error) {
-					field, err := reward.UnpackDescription(bytes.NewReader(packedField))
-					if err != nil {
-						return nil, err
-					}
-
-					return reward.MarshalDescription(field)
-				},
-			},
-		},
-		Indexes: map[string]IndexMeta{
-
-			"0.1": {
-				Name:     "Code",
-				Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexCode(packedKeys) },
-			},
-			"1.1": {
-				Name:     "Partner",
-				Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexPartner(packedKeys) },
-			},
-		},
-		PK: IndexMeta{
-
-			Name:     "Code",
-			Unpacker: func(packedKeys [][][]byte) (any, error) { return reward.UnpackKeyIndexCode(packedKeys) },
 		},
 	},
 }

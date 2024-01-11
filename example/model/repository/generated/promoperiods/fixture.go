@@ -4,11 +4,14 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.8.7 (Commit: e17c811b)
+// Generate info: argen@v1.11.0-b (Commit: 6934fae2)
 package promoperiods
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
 
 	"gopkg.in/yaml.v3"
@@ -27,18 +30,34 @@ func (objs PromoperiodsList) String() string {
 }
 
 type PromoperiodsFT struct {
-	ID         string                 `yaml:"id"`
-	Code       string                 `yaml:"code"`
-	Email      string                 `yaml:"email"`
-	Start      int32                  `yaml:"start"`
-	Finish     *dictionary.Product    `yaml:"finish"`
-	Action     string                 `yaml:"action"`
-	Platform   map[string]interface{} `yaml:"platform"`
-	Promobunch uint32                 `yaml:"promobunch"`
-	Platforms  uint32                 `yaml:"platforms"`
-	PlanID     int32                  `yaml:"plan_id"`
-	PlanType   string                 `yaml:"plan_type"`
-	Price      float64                `yaml:"price"`
+	ID         string                 `yaml:"id" mapstructure:"id" json:"id"`
+	Code       string                 `yaml:"code" mapstructure:"code" json:"code"`
+	Email      string                 `yaml:"email" mapstructure:"email" json:"email"`
+	Start      int32                  `yaml:"start" mapstructure:"start" json:"start"`
+	Finish     *dictionary.Product    `yaml:"finish" mapstructure:"finish" json:"finish"`
+	Action     string                 `yaml:"action" mapstructure:"action" json:"action"`
+	Platform   map[string]interface{} `yaml:"platform" mapstructure:"platform" json:"platform"`
+	Promobunch uint32                 `yaml:"promobunch" mapstructure:"promobunch" json:"promobunch"`
+	Platforms  uint32                 `yaml:"platforms" mapstructure:"platforms" json:"platforms"`
+	PlanID     int32                  `yaml:"plan_id" mapstructure:"plan_id" json:"plan_id"`
+	PlanType   string                 `yaml:"plan_type" mapstructure:"plan_type" json:"plan_type"`
+	Price      float64                `yaml:"price" mapstructure:"price" json:"price"`
+}
+
+func UnmarshalFixturesFromJSON(source []byte) ([]PromoperiodsFT, error) {
+	source = bytes.TrimLeft(source, " \t\r\n")
+
+	if len(source) > 0 && source[0] == '{' {
+		source = []byte(fmt.Sprintf("[%s]", string(source)))
+	}
+
+	var v []PromoperiodsFT
+
+	if err := json.Unmarshal([]byte(source), &v); err != nil {
+		return nil, err
+	}
+
+	return v, nil
 }
 
 func MarshalFixtures(objs []*Promoperiods) ([]byte, error) {

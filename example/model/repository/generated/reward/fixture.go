@@ -4,11 +4,14 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.8.7 (Commit: e17c811b)
+// Generate info: argen@v1.11.0-b (Commit: 6934fae2)
 package reward
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
 
 	"gopkg.in/yaml.v3"
@@ -27,13 +30,29 @@ func (objs RewardList) String() string {
 }
 
 type RewardFT struct {
-	Code        string                 `yaml:"code"`
-	Services    *ds.Services           `yaml:"services"`
-	Partner     string                 `yaml:"partner"`
-	Extra       *ds.Extra              `yaml:"extra"`
-	Flags       map[string]interface{} `yaml:"flags"`
-	Unlocked    ds.ServiceUnlocked     `yaml:"unlocked"`
-	Description *string                `yaml:"description"`
+	Code        string                 `yaml:"code" mapstructure:"code" json:"code"`
+	Services    *ds.Services           `yaml:"services" mapstructure:"services" json:"services"`
+	Partner     string                 `yaml:"partner" mapstructure:"partner" json:"partner"`
+	Extra       *ds.Extra              `yaml:"extra" mapstructure:"extra" json:"extra"`
+	Flags       map[string]interface{} `yaml:"flags" mapstructure:"flags" json:"flags"`
+	Unlocked    ds.ServiceUnlocked     `yaml:"unlocked" mapstructure:"unlocked" json:"unlocked"`
+	Description *string                `yaml:"description" mapstructure:"description" json:"description"`
+}
+
+func UnmarshalFixturesFromJSON(source []byte) ([]RewardFT, error) {
+	source = bytes.TrimLeft(source, " \t\r\n")
+
+	if len(source) > 0 && source[0] == '{' {
+		source = []byte(fmt.Sprintf("[%s]", string(source)))
+	}
+
+	var v []RewardFT
+
+	if err := json.Unmarshal([]byte(source), &v); err != nil {
+		return nil, err
+	}
+
+	return v, nil
 }
 
 func MarshalFixtures(objs []*Reward) ([]byte, error) {

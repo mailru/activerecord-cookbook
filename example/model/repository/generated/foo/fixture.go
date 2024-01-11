@@ -4,11 +4,14 @@
 // Manual changes to this file may cause unexpected behavior in your application.
 // Manual changes to this file will be overwritten if the code is regenerated.
 //
-// Generate info: argen@v1.8.7 (Commit: e17c811b)
+// Generate info: argen@v1.11.0-b (Commit: 6934fae2)
 package foo
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
 
 	"gopkg.in/yaml.v3"
@@ -18,9 +21,9 @@ import (
 )
 
 type FooFTPK struct {
-	SearchQuery map[string]string `yaml:"search_query"`
+	SearchQuery map[string]string `yaml:"search_query" mapstructure:"search_query" json:"search_query"`
 
-	TraceID string `yaml:"trace_id"`
+	TraceID string `yaml:"trace_id" mapstructure:"trace_id" json:"trace_id"`
 }
 
 type FooFT struct {
@@ -79,6 +82,22 @@ func UnmarshalFixtures(source []byte) []*Foo {
 	}
 
 	return objs
+}
+
+func UnmarshalFixturesFromJSON(source []byte) ([]FooFT, error) {
+	source = bytes.TrimLeft(source, " \t\r\n")
+
+	if len(source) > 0 && source[0] == '{' {
+		source = []byte(fmt.Sprintf("[%s]", string(source)))
+	}
+
+	var v []FooFT
+
+	if err := json.Unmarshal([]byte(source), &v); err != nil {
+		return nil, err
+	}
+
+	return v, nil
 }
 
 func (objs FooList) String() string {
