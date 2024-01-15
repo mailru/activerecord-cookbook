@@ -105,14 +105,14 @@ func TestConnectFailover(t *testing.T) {
 				st := time.Now()
 				// чтобы не тротлить пул
 				time.Sleep(800 * time.Microsecond)
-				err = nil //lua_procedure.Execute(ctx, "return box.info.status", activerecord.ReplicaOrMasterInstanceType)
+				err = execute(ctx, cfgName)
 
 				if err != nil {
 					// подождем немного и попробуем сделать еще запрос
 					time.Sleep(10 * time.Millisecond)
 					st := time.Now()
 
-					err = nil //lua_procedure.Execute(ctx, "return box.info.status", activerecord.ReplicaOrMasterInstanceType)
+					err = execute(ctx, cfgName)
 					if qDuration(st) > 5 {
 						log.Printf("'%d' long query %d, time: %d ms\n", g, i, qDuration(st))
 					}
@@ -146,7 +146,7 @@ func TestConnectFailover(t *testing.T) {
 	// останавливаем мастер ноду
 	require.NoError(t, master.Stop(ctx))
 	// подождем пока пингер актуализирует кластер после остановки ноды
-	time.Sleep(pingInterval)
+	time.Sleep(pingInterval + 10*time.Millisecond)
 
 	instances = pinger.ObservedInstances(cfgName)
 	// проверяем что остановленный мастер пропал из доступных узлов
@@ -160,7 +160,7 @@ func TestConnectFailover(t *testing.T) {
 	// останавливаем одну реплику (но в конфигурации активрекорд она по прежнему присутствует)
 	require.NoError(t, replica3.Stop(ctx))
 	// подождем пока пингер актуализирует кластер после остановки ноды
-	time.Sleep(pingInterval)
+	time.Sleep(pingInterval + 10*time.Millisecond)
 
 	instances = pinger.ObservedInstances(cfgName)
 	replicas = availableInstances(instances, activerecord.ModeReplica)
@@ -180,7 +180,7 @@ func TestConnectFailover(t *testing.T) {
 	})
 
 	// подождем пока пингер актуализирует кластер после остановки ноды
-	time.Sleep(pingInterval)
+	time.Sleep(pingInterval + 10*time.Millisecond)
 
 	// обновленная конфигурация состоит из 2 узлов
 	instances = pinger.ObservedInstances(cfgName)
@@ -197,6 +197,19 @@ func TestConnectFailover(t *testing.T) {
 	fmt.Println("wait for requests")
 	// ожидаем завершения всех запросов
 	eg.Wait()
+}
+
+func execute(ctx context.Context, path string) error {
+	box, err := octopus.Box(ctx, 0, activerecord.ReplicaOrMasterInstanceType, path, nil)
+	if err != nil {
+		return err
+	}
+	_, err = octopus.CallLua(ctx, box, "box.dostring", "return box.info.status")
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func availableInstances(instances []activerecord.ShardInstance, modeType activerecord.ServerModeType) []activerecord.ShardInstance {
