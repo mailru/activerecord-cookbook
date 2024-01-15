@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/ebirukov/tnt-containers v1.0.2
-	github.com/mailru/activerecord v1.11.0-b3
+	github.com/mailru/activerecord v1.11.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/sync v0.3.0
 	gopkg.in/yaml.v3 v3.0.1
