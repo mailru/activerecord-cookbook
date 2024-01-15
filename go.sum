@@ -68,8 +68,8 @@ github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 h1:6E+4a0GO5zZEnZ
 github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0/go.mod h1:zJYVVT2jmtg6P3p1VtQj7WsuWi/y4VnjVBn7F8KPB3I=
 github.com/magiconair/properties v1.8.7 h1:IeQXZAiQcpL9mgcAe1Nu6cX9LLw6ExEHKjN0VQdvPDY=
 github.com/magiconair/properties v1.8.7/go.mod h1:Dhd985XPs7jluiymwWYZ0G4Z61jb3vdS329zhj2hYo0=
-github.com/mailru/activerecord v1.11.0-b3 h1:mJsp9cGhm+nhKrU4UDs7++kW/uZ1FZDAoJBODCqvEuo=
-github.com/mailru/activerecord v1.11.0-b3/go.mod h1:Dg3GWaG8VauQujFrWsjlXX6I093sm3xq3945/aur+OM=
+github.com/mailru/activerecord v1.11.0 h1:OwxTHyMmrNuSe/7syqYcfKkkEoBapBvrylWZPuL3d/g=
+github.com/mailru/activerecord v1.11.0/go.mod h1:Dg3GWaG8VauQujFrWsjlXX6I093sm3xq3945/aur+OM=
 github.com/mailru/mapstructure v0.0.0-20230117153631-a4140f9ccc45 h1:x3Zw96Gt6HbEPUWsTbQYj/nfaNv5lWHy6CeEkl8gwqw=
 github.com/mailru/mapstructure v0.0.0-20230117153631-a4140f9ccc45/go.mod h1:guLmlFj8yjd0hoz+QWxRU4Gn+VOb2nOQZ4EqRmMHarw=
 github.com/moby/patternmatcher v0.5.0 h1:YCZgJOeULcxLw1Q+sVR636pmS7sPEn1Qo2iAN6M7DBo=

@@ -24,8 +24,6 @@ func TestConnectFailover(t *testing.T) {
 
 	arConnTimeout := 200 * time.Millisecond
 
-	pingInterval := 500 * time.Millisecond
-
 	// включаем микросекунды в std логере
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
 
@@ -63,8 +61,7 @@ func TestConnectFailover(t *testing.T) {
 		"arcfg/Timeout":  arConnTimeout,
 	})
 
-	pinger := activerecord.NewPinger(activerecord.WithPingInterval(pingInterval))
-	defer pinger.StopWatch()
+	pinger := NewBasicConnectionChecker()
 
 	logger := activerecord.NewLogger()
 	logger.SetLogLevel(activerecord.ErrorLoggerLevel)
@@ -75,11 +72,15 @@ func TestConnectFailover(t *testing.T) {
 		activerecord.WithConnectionPinger(pinger),
 	)
 
-	_, err = activerecord.AddClusterChecker(ctx, cfgName, octopus.ClusterConfigParams)
+	_, err = activerecord.AddClusterChecker(ctx, cfgName, activerecord.ClusterConfigParameters{
+		Globs:         octopus.DefaultConnectionParams,
+		OptionCreator: octopus.DefaultOptionCreator,
+		OptionChecker: octopus.CheckShardInstance,
+	})
 	require.NoError(t, err)
 
 	// проверяем типы и состав узлов кластера после загрузки конфигурации
-	instances := pinger.ObservedInstances(cfgName)
+	instances := pinger.ObservedInstances()
 	// все инстансы из конфигурации (включая несуществующие fakehost)
 	require.Len(t, instances, 5)
 
@@ -101,18 +102,18 @@ func TestConnectFailover(t *testing.T) {
 	for g := 0; g < 8; g++ {
 		g := g
 		eg.Go(func() error {
-			for i := 0; i < 1000; i++ {
+			for i := 0; i < 5000; i++ {
 				st := time.Now()
 				// чтобы не тротлить пул
 				time.Sleep(800 * time.Microsecond)
-				err = nil //lua_procedure.Execute(ctx, "return box.info.status", activerecord.ReplicaOrMasterInstanceType)
+				err = execute(ctx, cfgName)
 
 				if err != nil {
 					// подождем немного и попробуем сделать еще запрос
 					time.Sleep(10 * time.Millisecond)
 					st := time.Now()
 
-					err = nil //lua_procedure.Execute(ctx, "return box.info.status", activerecord.ReplicaOrMasterInstanceType)
+					err = execute(ctx, cfgName)
 					if qDuration(st) > 5 {
 						log.Printf("'%d' long query %d, time: %d ms\n", g, i, qDuration(st))
 					}
@@ -144,11 +145,10 @@ func TestConnectFailover(t *testing.T) {
 	}
 
 	// останавливаем мастер ноду
-	require.NoError(t, master.Stop(ctx))
-	// подождем пока пингер актуализирует кластер после остановки ноды
-	time.Sleep(pingInterval)
+	require.NoError(t, master.Terminate(ctx))
+	require.NoError(t, pinger.check(ctx))
 
-	instances = pinger.ObservedInstances(cfgName)
+	instances = pinger.ObservedInstances()
 	// проверяем что остановленный мастер пропал из доступных узлов
 	masters := availableInstances(instances, activerecord.ModeMaster)
 	require.Len(t, masters, 0)
@@ -159,16 +159,17 @@ func TestConnectFailover(t *testing.T) {
 
 	// останавливаем одну реплику (но в конфигурации активрекорд она по прежнему присутствует)
 	require.NoError(t, replica3.Stop(ctx))
-	// подождем пока пингер актуализирует кластер после остановки ноды
-	time.Sleep(pingInterval)
+	require.NoError(t, pinger.check(ctx))
 
-	instances = pinger.ObservedInstances(cfgName)
+	instances = pinger.ObservedInstances()
 	replicas = availableInstances(instances, activerecord.ModeReplica)
 	// осталась одна доступная реплика
 	require.Len(t, replicas, 1)
 	require.Equal(t, rHost1, replicas[0].Config.Addr)
 
-	require.NoError(t, master.Start(ctx))
+	// поднимает контейнер с мастером БД
+	master, err = tarantool.RunContainer(ctx, tarantool.WithTarantool15("tarantool/tarantool:1.5", time.Second))
+	require.NoError(t, err)
 	masterHost, err := master.ServerHostPort(ctx)
 	require.NoError(t, err)
 
@@ -179,11 +180,12 @@ func TestConnectFailover(t *testing.T) {
 		"arcfg/Timeout": arConnTimeout,
 	})
 
-	// подождем пока пингер актуализирует кластер после остановки ноды
-	time.Sleep(pingInterval)
+	log.Println("update arconfig")
+
+	require.NoError(t, pinger.check(ctx))
 
 	// обновленная конфигурация состоит из 2 узлов
-	instances = pinger.ObservedInstances(cfgName)
+	instances = pinger.ObservedInstances()
 	require.Len(t, instances, 2)
 
 	masters = availableInstances(instances, activerecord.ModeMaster)
@@ -199,6 +201,19 @@ func TestConnectFailover(t *testing.T) {
 	eg.Wait()
 }
 
+func execute(ctx context.Context, path string) error {
+	box, err := octopus.Box(ctx, 0, activerecord.ReplicaOrMasterInstanceType, path, nil)
+	if err != nil {
+		return err
+	}
+	_, err = octopus.CallLua(ctx, box, "box.dostring", "return box.info.status")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func availableInstances(instances []activerecord.ShardInstance, modeType activerecord.ServerModeType) []activerecord.ShardInstance {
 	ret := make([]activerecord.ShardInstance, 0, len(instances))
 	for _, instance := range instances {
@@ -208,6 +223,68 @@ func availableInstances(instances []activerecord.ShardInstance, modeType activer
 	}
 
 	return ret
+}
+
+type TestConnectionChecker struct {
+	checkParams activerecord.ClusterConfigParameters
+	cfgName     string
+	instances   []activerecord.ShardInstance
+}
+
+func (c *TestConnectionChecker) AddClusterChecker(ctx context.Context, cfgName string, params activerecord.ClusterConfigParameters) (*activerecord.Cluster, error) {
+	c.checkParams = params
+	c.cfgName = cfgName
+
+	return nil, c.check(ctx)
+}
+
+func NewBasicConnectionChecker() *TestConnectionChecker {
+	return &TestConnectionChecker{}
+}
+
+func (c *TestConnectionChecker) check(ctx context.Context) error {
+	clusterConfig, err := activerecord.ConfigCacher().Get(ctx, c.cfgName, c.checkParams.Globs, c.checkParams.OptionCreator)
+	if err != nil {
+		return fmt.Errorf("can't load cluster info: %w", err)
+	}
+
+	for i := 0; i < clusterConfig.Shards(); i++ {
+		curInstances := clusterConfig.ShardInstances(i)
+
+		var actualShard activerecord.Shard
+
+		for _, si := range curInstances {
+			opts, connErr := c.checkParams.OptionChecker(ctx, si)
+
+			if opts != nil {
+				si.Config.Mode = opts.InstanceMode()
+			}
+
+			instance := activerecord.ShardInstance{
+				ParamsID: si.ParamsID,
+				Config:   si.Config,
+				Options:  si.Options,
+				Offline:  connErr != nil,
+			}
+
+			switch instance.Config.Mode {
+			case activerecord.ModeMaster:
+				actualShard.Masters = append(actualShard.Masters, instance)
+			case activerecord.ModeReplica:
+				actualShard.Replicas = append(actualShard.Replicas, instance)
+			}
+		}
+
+		instances := actualShard.Instances()
+		c.instances = instances
+		clusterConfig.SetShardInstances(i, instances)
+	}
+
+	return nil
+}
+
+func (c *TestConnectionChecker) ObservedInstances() []activerecord.ShardInstance {
+	return c.instances
 }
 
 type TestConfig struct {
