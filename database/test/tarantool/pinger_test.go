@@ -98,10 +98,10 @@ func TestConnectFailover(t *testing.T) {
 
 	eg := &errgroup.Group{}
 	// асинхронно запускаем серию параллельных запросов в узлы кластера (отлавливаем тормоза и гонки)
-	for g := 0; g < 8; g++ {
+	for g := 0; g < 80; g++ {
 		g := g
 		eg.Go(func() error {
-			for i := 0; i < 1000; i++ {
+			for i := 0; i < 5000; i++ {
 				st := time.Now()
 				// чтобы не тротлить пул
 				time.Sleep(800 * time.Microsecond)
@@ -178,6 +178,8 @@ func TestConnectFailover(t *testing.T) {
 		"arcfg/replica": strings.Join([]string{rHost1}, ","),
 		"arcfg/Timeout": arConnTimeout,
 	})
+
+	fmt.Println("update arconfig")
 
 	// подождем пока пингер актуализирует кластер после остановки ноды
 	time.Sleep(pingInterval + 10*time.Millisecond)
